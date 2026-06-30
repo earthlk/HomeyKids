@@ -1,0 +1,4428 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Little Stars Training Center</title>
+  <style>
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --c-bg:        #0f1117;
+  --c-surface:   #1a1d27;
+  --c-surface2:  #222538;
+  --c-border:    #2e3250;
+  --c-primary:   #6c63ff;
+  --c-primary-h: #8b84ff;
+  --c-accent:    #f9a826;
+  --c-success:   #22c55e;
+  --c-danger:    #ef4444;
+  --c-warning:   #f59e0b;
+  --c-text:      #e8eaf0;
+  --c-muted:     #8b8fa8;
+  --c-card:      #1e2130;
+  --radius:      12px;
+  --radius-sm:   8px;
+  --shadow:      0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg:   0 8px 48px rgba(0,0,0,0.6);
+  --sidebar-w:   260px;
+  --font-body:   'Sarabun', 'Noto Sans Thai', sans-serif;
+  --font-display:'Kanit', 'Sarabun', sans-serif;
+  --transition:  0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--font-body); background: var(--c-bg); color: var(--c-text); min-height: 100vh; overflow-x: hidden; }
+a { color: var(--c-primary); text-decoration: none; }
+input, select, textarea { font-family: inherit; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ── Google Fonts ──────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
+
+/* ── Utilities ─────────────────────────────────────────────── */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.text-muted { color: var(--c-muted); }
+.text-success { color: var(--c-success); }
+.text-danger { color: var(--c-danger); }
+.text-accent { color: var(--c-accent); }
+.text-primary { color: var(--c-primary); }
+.font-bold { font-weight: 700; }
+.text-sm { font-size: 0.85rem; }
+.text-lg { font-size: 1.15rem; }
+.text-xl { font-size: 1.35rem; }
+
+/* ── Login Screen ──────────────────────────────────────────── */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.login-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #0f1117 0%, #1a1d27 50%, #0d0f1a 100%);
+}
+.login-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(108,99,255,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(249,168,38,0.08) 0%, transparent 60%);
+}
+.login-card {
+  position: relative;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeSlideUp 0.5s ease;
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.login-logo { text-align: center; margin-bottom: 32px; }
+.logo-icon { font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(0 0 16px rgba(249,168,38,0.6)); }
+.login-logo h1 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; color: var(--c-text); }
+.login-logo p { color: var(--c-muted); font-size: 0.9rem; margin-top: 2px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 0.85rem; color: var(--c-muted); margin-bottom: 6px; font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px 14px; background: var(--c-surface2);
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  color: var(--c-text); font-size: 0.95rem; transition: border-color var(--transition);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+}
+.form-group select option { background: var(--c-surface2); }
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 44px; }
+.pw-toggle {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--c-muted); font-size: 1rem; padding: 4px;
+}
+.login-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.9rem; margin-bottom: 14px; }
+.btn-login { width: 100%; margin-top: 8px; }
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--c-primary); color: #fff; border: none;
+  padding: 10px 20px; border-radius: var(--radius-sm); font-size: 0.95rem;
+  font-weight: 600; transition: all var(--transition); display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--c-primary-h); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,99,255,0.4); }
+.btn-secondary {
+  background: var(--c-surface2); color: var(--c-text); border: 1px solid var(--c-border);
+  padding: 10px 20px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 500; transition: all var(--transition);
+}
+.btn-secondary:hover { background: var(--c-border); }
+.btn-accent { background: var(--c-accent); color: #1a1d27; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 700; transition: all var(--transition); }
+.btn-accent:hover { filter: brightness(1.1); }
+.btn-danger { background: rgba(239,68,68,0.15); color: var(--c-danger); border: 1px solid rgba(239,68,68,0.3); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.9rem; transition: all var(--transition); }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+.btn-icon { background: none; border: none; color: var(--c-muted); padding: 6px; border-radius: 6px; transition: all var(--transition); font-size: 1.1rem; }
+.btn-icon:hover { background: var(--c-border); color: var(--c-text); }
+.btn-logout { width: 100%; background: rgba(239,68,68,0.1); color: var(--c-danger); border: 1px solid rgba(239,68,68,0.2); padding: 10px; border-radius: var(--radius-sm); font-size: 0.9rem; transition: all var(--transition); }
+.btn-logout:hover { background: rgba(239,68,68,0.2); }
+
+/* ── Sidebar ─────────────────────────────────────────────────  */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
+  background: var(--c-surface); border-right: 1px solid var(--c-border);
+  display: flex; flex-direction: column; z-index: 100;
+  transition: transform var(--transition);
+}
+.sidebar-header { display: flex; align-items: center; gap: 10px; padding: 20px 16px; border-bottom: 1px solid var(--c-border); }
+.sidebar-logo { font-size: 1.5rem; flex-shrink: 0; }
+.sidebar-title { flex: 1; }
+.app-name { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--c-text); }
+.app-sub { display: block; font-size: 0.72rem; color: var(--c-muted); }
+.sidebar-close { display: none; background: none; border: none; color: var(--c-muted); font-size: 1.2rem; }
+.user-badge { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--c-border); }
+.user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--c-primary), var(--c-primary-h)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+.user-name { display: block; font-weight: 600; font-size: 0.9rem; }
+.user-role { display: block; font-size: 0.75rem; color: var(--c-muted); }
+.side-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+.nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-muted); padding: 12px 10px 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm); color: var(--c-muted);
+  font-size: 0.9rem; cursor: pointer; transition: all var(--transition); margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: var(--c-surface2); color: var(--c-text); }
+.nav-item.active { background: rgba(108,99,255,0.15); color: var(--c-primary); border-color: rgba(108,99,255,0.3); }
+.nav-item .nav-icon { font-size: 1.15rem; width: 22px; text-align: center; }
+.sidebar-footer { padding: 12px; border-top: 1px solid var(--c-border); }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+/* ── Main Content ────────────────────────────────────────────── */
+.main-content { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: var(--c-surface); border-bottom: 1px solid var(--c-border); position: sticky; top: 0; z-index: 50; }
+.menu-toggle { display: none; background: none; border: none; color: var(--c-text); font-size: 1.4rem; }
+.topbar-title { flex: 1; font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
+.topbar-user { font-size: 0.85rem; color: var(--c-muted); }
+.page-content { flex: 1; padding: 24px; }
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; }
+
+/* ── Stats Grid ──────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 6px; transition: transform var(--transition); }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.stat-icon { font-size: 1.8rem; margin-bottom: 4px; }
+.stat-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--c-text); }
+.stat-label { font-size: 0.82rem; color: var(--c-muted); }
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--c-border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+thead tr { background: var(--c-surface2); }
+th { padding: 12px 14px; text-align: left; font-weight: 600; color: var(--c-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; border-bottom: 1px solid var(--c-border); }
+td { padding: 12px 14px; border-bottom: 1px solid rgba(46,50,80,0.5); vertical-align: middle; }
+tbody tr { transition: background var(--transition); }
+tbody tr:hover { background: rgba(108,99,255,0.04); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+.badge-success { background: rgba(34,197,94,0.15); color: var(--c-success); }
+.badge-warning { background: rgba(245,158,11,0.15); color: var(--c-warning); }
+.badge-danger  { background: rgba(239,68,68,0.15);  color: var(--c-danger);  }
+.badge-primary { background: rgba(108,99,255,0.15); color: var(--c-primary); }
+.badge-muted   { background: rgba(139,143,168,0.15); color: var(--c-muted); }
+.badge-accent  { background: rgba(249,168,38,0.15); color: var(--c-accent); }
+
+/* ── Calendar ────────────────────────────────────────────────── */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-nav { display: flex; gap: 8px; }
+.cal-month { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-day-name { text-align: center; font-size: 0.78rem; font-weight: 600; color: var(--c-muted); padding: 8px 0; text-transform: uppercase; }
+.cal-day {
+  min-height: 80px; background: var(--c-surface2); border-radius: var(--radius-sm);
+  padding: 6px; font-size: 0.85rem; cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent;
+}
+.cal-day:hover { border-color: var(--c-primary); background: rgba(108,99,255,0.08); }
+.cal-day.today { border-color: var(--c-accent); }
+.cal-day.other-month { opacity: 0.35; }
+.cal-day-num { font-weight: 600; margin-bottom: 4px; font-size: 0.9rem; }
+.cal-day.today .cal-day-num { color: var(--c-accent); }
+.cal-event { background: rgba(108,99,255,0.2); border-left: 3px solid var(--c-primary); padding: 2px 5px; border-radius: 3px; font-size: 0.7rem; margin-bottom: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
+.cal-event:hover { background: rgba(108,99,255,0.35); }
+.cal-event.completed { border-color: var(--c-success); background: rgba(34,197,94,0.15); }
+.cal-event.cancelled { border-color: var(--c-muted); background: rgba(139,143,168,0.1); text-decoration: line-through; }
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.modal-box { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 16px; padding: 28px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-lg); animation: modalIn 0.2s ease; }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-close { position: absolute; right: 16px; top: 16px; background: none; border: none; color: var(--c-muted); font-size: 1.2rem; transition: color var(--transition); }
+.modal-close:hover { color: var(--c-text); }
+.modal-title { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+
+/* ── Forms ───────────────────────────────────────────────────── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--c-border); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b8fa8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+/* ── Filter Bar ──────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-bar input, .filter-bar select { padding: 8px 12px; background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); color: var(--c-text); font-size: 0.87rem; }
+.filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: var(--c-primary); }
+
+/* ── Page Header ─────────────────────────────────────────────── */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.page-heading { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.page-sub { color: var(--c-muted); font-size: 0.85rem; margin-top: 2px; }
+
+/* ── Progress Bar ─────────────────────────────────────────────── */
+.progress-bar { background: var(--c-surface2); border-radius: 99px; height: 8px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--c-primary), var(--c-primary-h)); transition: width 0.5s ease; }
+
+/* ── Session List ─────────────────────────────────────────────── */
+.session-item { display: flex; align-items: center; gap: 14px; padding: 14px; background: var(--c-surface2); border-radius: var(--radius-sm); border: 1px solid var(--c-border); margin-bottom: 8px; transition: all var(--transition); }
+.session-item:hover { border-color: var(--c-primary); background: rgba(108,99,255,0.05); }
+.session-date { text-align: center; min-width: 52px; }
+.session-date .day { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.session-date .month { font-size: 0.72rem; color: var(--c-muted); text-transform: uppercase; }
+.session-divider { width: 2px; height: 44px; background: var(--c-border); border-radius: 99px; }
+.session-info { flex: 1; }
+.session-name { font-weight: 600; font-size: 0.95rem; }
+.session-meta { font-size: 0.8rem; color: var(--c-muted); margin-top: 2px; }
+.session-actions { display: flex; gap: 6px; }
+
+/* ── Receipt ─────────────────────────────────────────────────── */
+.receipt-paper { background: #fff; color: #1a1a1a; padding: 40px; border-radius: var(--radius); max-width: 560px; margin: 0 auto; font-family: 'Sarabun', sans-serif; box-shadow: var(--shadow-lg); }
+.receipt-header { text-align: center; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
+.receipt-logo { font-size: 2.5rem; margin-bottom: 8px; }
+.receipt-title { font-size: 1.6rem; font-weight: 700; color: #1a1d27; font-family: var(--font-display); }
+.receipt-sub { color: #64748b; font-size: 0.9rem; }
+.receipt-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 20px 0; }
+.receipt-meta-item label { font-size: 0.78rem; color: #94a3b8; display: block; }
+.receipt-meta-item span { font-weight: 600; }
+.receipt-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.receipt-table th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 0.82rem; color: #64748b; }
+.receipt-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+.receipt-total { text-align: right; margin-top: 16px; border-top: 2px solid #1a1d27; padding-top: 12px; }
+.receipt-total .amount { font-size: 1.4rem; font-weight: 700; color: #6c63ff; }
+.receipt-footer { text-align: center; margin-top: 24px; font-size: 0.82rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+.receipt-stamp { display: inline-block; border: 3px solid var(--c-success); color: var(--c-success); padding: 6px 18px; border-radius: 4px; font-weight: 700; font-size: 1rem; transform: rotate(-8deg); margin: 12px 0; letter-spacing: 0.1em; }
+
+/* ── Report ───────────────────────────────────────────────────── */
+.report-paper { background: #fff; color: #1a1a1a; padding: 40px; border-radius: var(--radius); max-width: 680px; margin: 0 auto; font-family: 'Sarabun', sans-serif; }
+.report-header { border-bottom: 3px solid #6c63ff; padding-bottom: 20px; margin-bottom: 24px; }
+.report-logo-row { display: flex; align-items: center; gap: 12px; }
+.report-child-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; background: #f8fafc; padding: 16px; border-radius: 8px; }
+.report-section { margin-bottom: 24px; }
+.report-section h3 { font-size: 1rem; font-weight: 700; color: #1a1d27; border-left: 4px solid #6c63ff; padding-left: 10px; margin-bottom: 12px; }
+.report-table th { background: #6c63ff; color: #fff; }
+.rating-stars { color: #f9a826; font-size: 1.1rem; }
+
+/* ── Activity Log Form ────────────────────────────────────────── */
+.activity-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--c-border); margin-bottom: 16px; }
+.activity-tab { padding: 8px 16px; border: none; background: none; color: var(--c-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition); font-size: 0.9rem; }
+.activity-tab.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
+.skill-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.skill-chip { padding: 4px 12px; border-radius: 20px; border: 1px solid var(--c-border); background: var(--c-surface2); color: var(--c-muted); font-size: 0.82rem; cursor: pointer; transition: all var(--transition); }
+.skill-chip.selected { background: rgba(108,99,255,0.2); border-color: var(--c-primary); color: var(--c-primary); }
+.star-rating { display: flex; gap: 6px; }
+.star-btn { font-size: 1.5rem; background: none; border: none; cursor: pointer; color: var(--c-border); transition: color var(--transition); }
+.star-btn.active { color: var(--c-accent); }
+
+/* ── Finance Summary ──────────────────────────────────────────── */
+.finance-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.finance-card { background: var(--c-surface2); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
+.finance-card .amount { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.finance-card .label { font-size: 0.8rem; color: var(--c-muted); margin-top: 4px; }
+
+/* ── Loading ──────────────────────────────────────────────────── */
+.loading-spinner { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 16px; color: var(--c-muted); }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--c-border); border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 12px 20px; box-shadow: var(--shadow); z-index: 500; min-width: 240px; animation: toastIn 0.3s ease; font-size: 0.9rem; }
+.toast.success { border-color: var(--c-success); }
+.toast.error { border-color: var(--c-danger); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Tabs ─────────────────────────────────────────────────────── */
+.tab-bar { display: flex; gap: 4px; background: var(--c-surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 20px; }
+.tab-btn { flex: 1; padding: 8px 12px; background: none; border: none; color: var(--c-muted); border-radius: var(--radius-sm); font-size: 0.88rem; cursor: pointer; transition: all var(--transition); font-family: inherit; }
+.tab-btn.active { background: var(--c-primary); color: #fff; font-weight: 600; }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-close { display: block; }
+  .sidebar-overlay.open { display: block; }
+  .main-content { margin-left: 0; }
+  .menu-toggle { display: block; }
+  .form-row { grid-template-columns: 1fr; }
+  .cal-day { min-height: 56px; }
+  .cal-event { display: none; }
+  .page-content { padding: 16px; }
+  .receipt-paper, .report-paper { padding: 20px; }
+  .receipt-meta { grid-template-columns: 1fr; }
+}
+
+/* ── PDPA Consent Modal ──────────────────────────────────────── */
+.consent-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  z-index: 1000; display: none; align-items: center;
+  justify-content: center; padding: 20px; backdrop-filter: blur(6px);
+}
+.consent-box {
+  background: var(--c-surface); border: 1px solid var(--c-primary);
+  border-radius: 16px; width: 100%; max-width: 620px;
+  max-height: 90vh; display: flex; flex-direction: column;
+  box-shadow: 0 0 60px rgba(108,99,255,0.3);
+  animation: modalIn 0.3s ease;
+}
+.consent-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px 24px; border-bottom: 1px solid var(--c-border);
+  flex-shrink: 0;
+}
+.consent-logo { font-size: 2.5rem; }
+.consent-header h2 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+.consent-body {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+}
+.consent-footer {
+  padding: 16px 24px; border-top: 1px solid var(--c-border);
+  flex-shrink: 0; background: var(--c-surface2); border-radius: 0 0 16px 16px;
+}
+.consent-check {
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer; font-size: 0.9rem; line-height: 1.5;
+}
+.consent-check input[type=checkbox] {
+  width: 18px; height: 18px; flex-shrink: 0;
+  accent-color: var(--c-primary); cursor: pointer; margin-top: 2px;
+}
+
+/* ── PDPA Policy Text ────────────────────────────────────────── */
+.pdpa-policy-text {
+  color: var(--c-text);
+  line-height: 1.7;
+}
+.pdpa-policy-text h3 {
+  font-family: var(--font-display); font-size: 1.1rem;
+  color: var(--c-primary); margin: 0 0 12px;
+}
+.pdpa-policy-text h4 {
+  font-size: 0.95rem; font-weight: 700;
+  margin: 16px 0 6px; color: var(--c-text);
+}
+.pdpa-policy-text p {
+  color: var(--c-muted); font-size: 0.9rem; margin-bottom: 8px;
+}
+.pdpa-policy-text ul {
+  padding-left: 16px; margin-bottom: 8px;
+}
+.pdpa-policy-text li {
+  color: var(--c-muted); font-size: 0.88rem;
+  margin-bottom: 4px; line-height: 1.5;
+}
+.pdpa-policy-text strong { color: var(--c-text); }
+
+/* ── Photo Gallery ───────────────────────────────────────────── */
+.photo-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0;
+}
+.photo-card {
+  width: 110px; flex-shrink: 0;
+  background: var(--c-surface2); border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm); padding: 6px;
+  transition: border-color var(--transition);
+}
+.photo-card:hover { border-color: var(--c-primary); }
+.photo-card img {
+  width: 100%; height: 80px; object-fit: cover;
+  border-radius: 6px; cursor: pointer; display: block;
+  transition: opacity var(--transition);
+}
+.photo-card img:hover { opacity: 0.85; }
+.photo-meta {
+  color: var(--c-muted); margin-top: 4px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.72rem;
+}
+
+/* ── Photo upload drop area ──────────────────────────────────── */
+.upload-area {
+  border: 2px dashed var(--c-border); border-radius: var(--radius-sm);
+  padding: 24px; text-align: center; cursor: pointer;
+  transition: all var(--transition); color: var(--c-muted);
+}
+.upload-area:hover {
+  border-color: var(--c-primary); background: rgba(108,99,255,0.05);
+  color: var(--c-primary);
+}
+.upload-icon { font-size: 2rem; margin-bottom: 8px; }
+
+
+/* ── ข้อมูลการแพทย์ — หัวข้อย่อยใน modal ────────────────────── */
+.medical-section-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-muted);
+  margin: 14px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--c-border);
+}
+
+/* ── badge แสดงข้อมูลสุขภาพในตาราง/card ────────────────────── */
+.tag-allergy {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444; padding: 2px 8px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 600; margin: 2px 2px 0 0;
+}
+.tag-medical {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+  color: #f59e0b; padding: 2px 8px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 600; margin: 2px 2px 0 0;
+}
+.tag-blood {
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35);
+  color: #f87171; font-weight: 700; padding: 2px 10px;
+  border-radius: 20px; font-size: 0.75rem;
+}
+
+
+/* ── field ข้อจำกัดทางร่างกาย — border เตือน ────────────────── */
+#cPhysicalLimitation {
+  border-color: rgba(245,158,11,0.45);
+}
+#cPhysicalLimitation:focus {
+  border-color: var(--c-warning);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   People Card View — ผู้ปกครอง & เด็ก
+   ══════════════════════════════════════════════════════════════ */
+
+/* Grid layout */
+.people-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.people-empty {
+  color: var(--c-muted);
+  text-align: center;
+  padding: 40px;
+  grid-column: 1 / -1;
+}
+
+/* Card base */
+.people-card {
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.people-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: var(--c-border2);
+}
+/* เด็กที่มีข้อมูลแพ้/โรค — border เตือน */
+.people-card--alert {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+.people-card--alert:hover {
+  border-color: var(--c-warning);
+}
+
+/* Card header — ปรับ padding ให้รองรับ avatar ใหญ่ */
+.people-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  position: relative;
+}
+.people-card-header--parent {
+  background: linear-gradient(135deg, #1e2a4a 0%, #16213a 100%);
+  border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+}
+.people-card-header--child {
+  background: linear-gradient(135deg, #1a2e2a 0%, #142420 100%);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* Avatar สี่เหลี่ยมขอบมน — ใหญ่และเห็นชัด */
+.people-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.people-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.people-avatar-initials {
+  font-family: var(--font-d);
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+}
+
+/* ชื่อใน header */
+.people-card-title { flex: 1; min-width: 0; }
+.people-card-name {
+  font-family: var(--font-d);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+}
+.people-card-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* กรุ๊ปเลือด badge มุมขวา */
+.people-blood-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+/* Card body */
+.people-card-body {
+  padding: 14px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.people-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.83rem;
+  color: var(--c-text);
+  line-height: 1.4;
+}
+.people-info-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  margin-top: 1px;
+}
+
+/* Chip ชื่อเด็กในการ์ดผู้ปกครอง */
+.people-card-children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.people-child-chip {
+  background: rgba(108, 99, 255, 0.12);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  color: var(--c-primary-h);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Alert tags (แพ้อาหาร, แพ้ยา ฯลฯ) */
+.people-alert-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--c-border);
+}
+.people-alert-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--c-warning);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.73rem;
+  font-weight: 600;
+}
+.people-alert-tag--drug {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--c-danger);
+}
+.people-alert-tag--med {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+}
+.people-alert-tag--limit {
+  background: rgba(139, 143, 168, 0.1);
+  border-color: rgba(139, 143, 168, 0.25);
+  color: var(--c-muted);
+}
+
+/* Card footer */
+.people-card-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   People Detail Popup
+   ══════════════════════════════════════════════════════════════ */
+
+/* Header ของ popup */
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  margin: -26px -26px 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.detail-header--parent {
+  background: linear-gradient(135deg, #1e2a4a 0%, #16213a 100%);
+  border-bottom: 1px solid rgba(108,99,255,0.25);
+}
+.detail-header--child {
+  background: linear-gradient(135deg, #1a2e2a 0%, #142420 100%);
+  border-bottom: 1px solid rgba(34,197,94,0.25);
+}
+
+/* Avatar ใน popup — ใหญ่กว่าการ์ด */
+.detail-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+
+/* ชื่อใน popup header */
+.detail-title {
+  flex: 1;
+  padding-top: 4px;
+}
+.detail-name {
+  font-family: var(--font-d);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.detail-nickname {
+  font-family: var(--font-d);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  margin-top: 3px;
+}
+
+/* Sections */
+.detail-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--c-border);
+}
+.detail-section:first-of-type {
+  margin-top: 20px;
+}
+.detail-section--alert {
+  background: rgba(245,158,11,0.05);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 16px;
+}
+.detail-section--alert .detail-section-title {
+  border: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.detail-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--c-muted);
+  margin-bottom: 10px;
+}
+
+/* แถวข้อมูล label: value */
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(46,50,80,0.4);
+  font-size: 0.88rem;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  color: var(--c-muted);
+  min-width: 110px;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+}
+.detail-value {
+  color: var(--c-text);
+  font-weight: 500;
+  flex: 1;
+}
+
+/* แถวเด็ก/ผู้ปกครอง — กดได้ */
+.detail-child-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition);
+  margin-bottom: 4px;
+  border: 1px solid var(--c-border);
+}
+.detail-child-row:hover {
+  background: rgba(108,99,255,0.08);
+  border-color: var(--c-primary);
+}
+.detail-child-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-d);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+
+/* ── Skeleton Loader ─────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.skeleton-base {
+  background: linear-gradient(90deg,
+    var(--c-surface2) 25%,
+    var(--c-border)   50%,
+    var(--c-surface2) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.detail-skeleton {
+  padding: 4px 0;
+}
+.detail-skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  margin: -26px -26px 0;
+  background: var(--c-surface2);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: 1px solid var(--c-border);
+}
+.skeleton-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 25%,
+    rgba(255,255,255,0.1)  50%,
+    rgba(255,255,255,0.06) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    var(--c-surface2) 25%,
+    var(--c-border)   50%,
+    var(--c-surface2) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  width: 100%;
+}
+.skeleton-line--lg { height: 20px; width: 70%; }
+.skeleton-line--md { height: 14px; width: 45%; }
+.skeleton-line--sm { height: 12px; width: 30%; }
+
+/* ใน header ใช้สี lighter */
+.detail-skeleton-header .skeleton-line {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 25%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.06) 75%
+  );
+  background-size: 800px 100%;
+}
+.detail-skeleton-header .skeleton-line--lg { height: 20px; width: 60%; }
+.detail-skeleton-header .skeleton-line--md { height: 13px; width: 40%; }
+
+.skeleton-body {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.skeleton-body .skeleton-line:nth-child(1) { width: 85%; }
+.skeleton-body .skeleton-line:nth-child(2) { width: 65%; }
+.skeleton-body .skeleton-line:nth-child(3) { width: 75%; }
+.skeleton-body .skeleton-line:nth-child(4) { width: 55%; }
+.skeleton-body .skeleton-line:nth-child(5) { width: 70%; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Calendar — Multi-view (Day/Week/Month/Year) + Session Cards
+   ══════════════════════════════════════════════════════════════ */
+
+/* Toolbar */
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.cal-view-switch {
+  display: flex;
+  background: var(--c-surface2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.cal-view-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--c-muted);
+  font-size: .82rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+}
+.cal-view-btn.active {
+  background: var(--c-primary);
+  color: #fff;
+  font-weight: 600;
+}
+.cal-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cal-title-text {
+  font-family: var(--font-d);
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 180px;
+  text-align: center;
+}
+
+/* ── Month Grid (ปรับ event ให้แสดงรายละเอียดมากขึ้น) ─────────── */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-day-name {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--c-muted);
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+.cal-day {
+  min-height: 90px;
+  background: var(--c-surface2);
+  border-radius: var(--radius-xs);
+  padding: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+}
+.cal-day:hover { border-color: var(--c-primary); background: rgba(108,99,255,.06); }
+.cal-day.today  { border-color: var(--c-accent); }
+.cal-day.other-month { opacity: .3; }
+.cal-day-num { font-weight: 700; font-size: .88rem; margin-bottom: 4px; }
+.cal-day.today .cal-day-num { color: var(--c-accent); }
+.cal-event {
+  background: rgba(108,99,255,.18);
+  border-left: 3px solid var(--c-primary);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: .68rem;
+  margin-bottom: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.cal-event:hover { background: rgba(108,99,255,.3); }
+.cal-event.completed { border-left-color: var(--c-success); background: rgba(34,197,94,.12); }
+.cal-event.cancelled { border-left-color: var(--c-muted); opacity: .5; text-decoration: line-through; }
+.cal-more { font-size: .65rem; color: var(--c-muted); text-align: right; }
+
+/* ── Week Grid ────────────────────────────────────────────────── */
+.cal-week-wrap { overflow-x: auto; }
+.cal-week-header {
+  display: grid;
+  grid-template-columns: 52px repeat(7, 1fr);
+  gap: 1px;
+  background: var(--c-border);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  overflow: hidden;
+  margin-bottom: 1px;
+}
+.cal-week-time-col { background: var(--c-surface); }
+.cal-week-col-header {
+  background: var(--c-surface2);
+  text-align: center;
+  padding: 8px 4px;
+}
+.cal-week-col-header.today { background: rgba(108,99,255,.12); }
+.cal-week-day-name { font-size: .72rem; color: var(--c-muted); text-transform: uppercase; }
+.cal-week-day-num {
+  font-family: var(--font-d);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.cal-week-day-num.today { color: var(--c-accent); }
+.cal-week-count { font-size: .68rem; color: var(--c-primary); margin-top: 2px; }
+.cal-week-body { }
+.cal-week-row {
+  display: grid;
+  grid-template-columns: 52px repeat(7, 1fr);
+  gap: 1px;
+  background: var(--c-border);
+  min-height: 48px;
+}
+.cal-week-time {
+  background: var(--c-surface);
+  font-size: .7rem;
+  color: var(--c-muted);
+  text-align: right;
+  padding: 4px 6px;
+  line-height: 1;
+}
+.cal-week-cell {
+  background: var(--c-surface2);
+  padding: 2px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.cal-week-cell:hover { background: rgba(108,99,255,.06); }
+.cal-week-event {
+  background: rgba(108,99,255,.2);
+  border-left: 3px solid var(--c-primary);
+  border-radius: 3px;
+  padding: 3px 5px;
+  font-size: .7rem;
+  cursor: pointer;
+  margin-bottom: 1px;
+  line-height: 1.35;
+}
+.cal-week-event:hover { background: rgba(108,99,255,.35); }
+.cal-week-event.completed { border-left-color: var(--c-success); background: rgba(34,197,94,.12); }
+.cal-week-event.cancelled { opacity: .45; text-decoration: line-through; }
+
+/* ── Day List ──────────────────────────────────────────────────── */
+.cal-day-list { display: flex; flex-direction: column; gap: 10px; }
+.cal-empty {
+  text-align: center;
+  color: var(--c-muted);
+  padding: 48px 20px;
+  font-size: .9rem;
+}
+
+/* ── Year Grid ─────────────────────────────────────────────────── */
+.cal-year-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.cal-year-month {
+  background: var(--c-surface2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+.cal-year-month:hover { border-color: var(--c-primary); background: rgba(108,99,255,.06); transform: translateY(-2px); }
+.cal-year-empty { opacity: .5; }
+.cal-year-month-name { font-family: var(--font-d); font-weight: 700; font-size: .95rem; margin-bottom: 6px; }
+.cal-year-count { font-size: 1.2rem; font-weight: 700; color: var(--c-primary); }
+.cal-year-status { font-size: .72rem; color: var(--c-muted); margin-top: 4px; }
+
+/* ── Session Cards View ─────────────────────────────────────────── */
+.cal-cards-group { margin-bottom: 20px; }
+.cal-cards-date-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--c-surface2);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-left: 4px solid var(--c-border2);
+  margin-bottom: 2px;
+}
+.cal-cards-date-header.today { border-left-color: var(--c-accent); }
+.cal-cards-date-header.past  { opacity: .7; }
+.cal-cards-day-num {
+  font-family: var(--font-d);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 32px;
+}
+.cal-cards-month { font-size: .82rem; color: var(--c-muted); }
+.cal-cards-day-name { font-size: .82rem; color: var(--c-muted); }
+.cal-cards-today-badge {
+  background: var(--c-accent);
+  color: #1a1d27;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.cal-cards-count { margin-left: auto; font-size: .78rem; color: var(--c-muted); }
+.cal-cards-day-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+/* Session Card */
+.session-card {
+  display: flex;
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.session-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--c-border2); }
+.session-card.status-completed { border-left: none; }
+.session-card.status-cancelled { opacity: .6; }
+.session-card-stripe {
+  width: 4px;
+  flex-shrink: 0;
+}
+.session-card-content {
+  flex: 1;
+  padding: 10px 14px;
+}
+.session-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.session-card-time {
+  font-family: var(--font-d);
+  font-size: .82rem;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+.session-card-title {
+  font-family: var(--font-d);
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.session-card-parent {
+  font-weight: 400;
+  font-size: .8rem;
+  color: var(--c-muted);
+  margin-left: 4px;
+}
+.session-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: .78rem;
+  color: var(--c-muted);
+}
+
+@media (max-width: 768px) {
+  .cal-toolbar { flex-direction: column; align-items: stretch; }
+  .cal-nav-center { justify-content: center; }
+  .cal-view-switch { justify-content: center; }
+  .cal-day { min-height: 60px; }
+  .cal-week-wrap { font-size: .75rem; }
+  .cal-year-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+
+/* ── Calendar View Dropdown ──────────────────────────────────── */
+.cal-view-dropdown {
+  position: relative;
+}
+.cal-view-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px;
+  justify-content: space-between;
+}
+.cal-view-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  min-width: 130px;
+  overflow: hidden;
+  animation: fadeUp .15s ease;
+}
+.cal-view-menu-item {
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: .88rem;
+  transition: background var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cal-view-menu-item:hover { background: var(--c-surface2); }
+.cal-view-menu-item.active {
+  background: rgba(108,99,255,.12);
+  color: var(--c-primary);
+  font-weight: 600;
+}
+
+/* ── Calendar Event Details (Month/Week) ─────────────────────── */
+.cal-event-time {
+  font-size: .65rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+  line-height: 1.2;
+}
+.cal-event-name {
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event-parent {
+  font-weight: 400;
+  opacity: .75;
+  font-size: .68rem;
+}
+.cal-event-detail {
+  font-size: .66rem;
+  opacity: .8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* ── Session Detail Modal Grid ───────────────────────────────── */
+.session-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.session-detail-item {
+  background: var(--c-surface2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.session-detail-full {
+  grid-column: 1 / -1;
+}
+.session-detail-label {
+  font-size: .75rem;
+  color: var(--c-muted);
+  margin-bottom: 4px;
+}
+.session-detail-value {
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--c-text);
+}
+
+/* ── Session Card parent row ─────────────────────────────────── */
+.session-card-parent-row {
+  font-size: .78rem;
+  color: var(--c-muted);
+  margin-bottom: 5px;
+}
+
+/* Week event ต้องสูงขึ้นรองรับ detail หลาย line */
+.cal-week-event {
+  min-height: 60px;
+}
+
+@media (max-width: 768px) {
+  .session-detail-grid { grid-template-columns: 1fr; }
+}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+      <div class="login-bg"></div>
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="logo-icon">⭐</div>
+          <h1>Little Stars</h1>
+          <p>Training Center</p>
+        </div>
+        <div class="login-form">
+          <div class="form-group">
+            <label>อีเมล / Email</label>
+            <input type="email" id="loginEmail" placeholder="email@example.com" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label>รหัสผ่าน / Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+              <button class="pw-toggle" onclick="togglePw()">👁</button>
+            </div>
+          </div>
+          <div id="loginError" class="login-error hidden"></div>
+          <button class="btn-primary btn-login" onclick="doLogin()">
+            <span id="loginBtnText">เข้าสู่ระบบ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">⭐</div>
+          <div class="sidebar-title">
+            <span class="app-name">Little Stars</span>
+            <span class="app-sub">Training Center</span>
+          </div>
+          <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+        </div>
+        <div class="user-badge">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <span class="user-name" id="userNameDisplay">-</span>
+            <span class="user-role" id="userRoleDisplay">-</span>
+          </div>
+        </div>
+        <nav id="sideNav" class="side-nav"></nav>
+        <div class="sidebar-footer">
+          <button class="btn-logout" onclick="doLogout()">🚪 ออกจากระบบ</button>
+        </div>
+      </aside>
+
+      <!-- Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="topbar">
+          <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+          <div class="topbar-title" id="pageTitle">Dashboard</div>
+          <div class="topbar-right">
+            <span class="topbar-user" id="topbarUser">-</span>
+          </div>
+        </header>
+        <main id="pageContent" class="page-content">
+          <div class="loading-spinner" id="globalLoader">
+            <div class="spinner"></div>
+            <p>กำลังโหลด...</p>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Modal -->
+    <div id="modalBackdrop" class="modal-backdrop hidden" onclick="closeModal()">
+      <div id="modalBox" class="modal-box" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDPA Consent Backdrop (shown before app loads) -->
+  <div id="consentBackdrop" class="consent-backdrop"></div>
+
+
+</body>
+
+<script>
+// ============================================================
+// CONFIG — แก้ค่านี้หลัง deploy GAS
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwuycMVX9sKNEbF-84Ptzr-GT5JKCPUrM9IhSE2a23QsBCjKRMnXQDbd7hVpdT3GObU6Q/exec';
+
+// ── GAS fetch wrapper (แทน google.script.run) ────────────────
+async function gasCall(action, payload = {}) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload, token: APP.token }),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+// ============================================================
+// Little Stars Training Center — Frontend App
+// ============================================================
+
+// ── State ─────────────────────────────────────────────────────
+const APP = {
+  token: null, role: null, name: null, userId: null,
+  currentPage: null,
+  calDate: new Date(),
+};
+
+// ── Init ──────────────────────────────────────────────────────
+window.onload = () => {
+  const saved = sessionStorage.getItem('ls_session');
+  if (saved) {
+    const s = JSON.parse(saved);
+    APP.token = s.token; APP.role = s.role; APP.name = s.name; APP.userId = s.userId;
+    checkConsent().then(ok => { if (ok) showApp(); });
+  }
+};
+
+// ── Auth ──────────────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtnText');
+  if (!email || !password) { showLoginError('กรุณากรอกอีเมลและรหัสผ่าน'); return; }
+  btn.textContent = 'กำลังเข้าสู่ระบบ...';
+  errEl.classList.add('hidden');
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST', mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', email, password }),
+    }).then(r => r.json());
+    btn.textContent = 'เข้าสู่ระบบ';
+    if (r.success) {
+      APP.token = r.token; APP.role = r.role; APP.name = r.name; APP.userId = r.userId;
+      sessionStorage.setItem('ls_session', JSON.stringify(APP));
+      checkConsent().then(ok => { if (ok) showApp(); });
+    } else { showLoginError(r.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'); }
+  } catch(e) { btn.textContent = 'เข้าสู่ระบบ'; showLoginError('เกิดข้อผิดพลาด: ' + e.message); }
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+
+function doLogout() {
+  gasCall('logout', {}).catch(()=>{});
+  sessionStorage.removeItem('ls_session');
+  sessionStorage.removeItem('ls_consented'); // clear consent flag เมื่อ logout
+  // reset APP state ทั้งหมดให้สะอาด
+  APP.token = null; APP.role = null; APP.name = null; APP.userId = null;
+  APP.currentPage = null; APP._calSessions = null; APP.calView = null; APP.calTab = null;
+  document.getElementById('mainApp').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginPassword').value = '';
+}
+
+function togglePw() {
+  const inp = document.getElementById('loginPassword');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ── App Shell ─────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('userNameDisplay').textContent = APP.name;
+  document.getElementById('userRoleDisplay').textContent = roleLabel(APP.role);
+  document.getElementById('topbarUser').textContent = APP.name;
+  document.getElementById('userAvatar').textContent = APP.name.charAt(0).toUpperCase();
+  buildNav();
+  navigateTo('dashboard');
+}
+
+function roleLabel(r) {
+  return { admin: '👑 Admin', trainer: '🏅 Trainer', parent: '👨‍👩‍👧 Parent' }[r] || r;
+}
+
+// ── Navigation ─────────────────────────────────────────────────
+const NAV_ITEMS = {
+  admin: [
+    { id: 'dashboard',  icon: '📊', label: 'Dashboard' },
+    { id: 'calendar',   icon: '📅', label: 'ปฏิทิน' },
+    { id: 'activity',   icon: '📝', label: 'บันทึกกิจกรรม' },
+    { id: 'courses',    icon: '📚', label: 'ระบบคอร์ส' },
+    { id: 'finance',    icon: '💰', label: 'การเงิน' },
+    { id: 'people',     icon: '👥', label: 'ผู้ปกครอง & เด็ก' },
+    { id: 'report',     icon: '📋', label: 'แบบสรุปการเรียน' },
+    { id: 'receipt',    icon: '🧾', label: 'ใบเสร็จรับเงิน' },
+    { id: 'users',      icon: '⚙️',  label: 'จัดการผู้ใช้' },
+    { id: 'pdpa',       icon: '🛡️',  label: 'PDPA Dashboard' },
+  ],
+  trainer: [
+    { id: 'dashboard',  icon: '📊', label: 'Dashboard' },
+    { id: 'calendar',   icon: '📅', label: 'ตารางสอน' },
+    { id: 'activity',   icon: '📝', label: 'บันทึกกิจกรรม' },
+    { id: 'finance',    icon: '💰', label: 'รายได้ของฉัน' },
+  ],
+  parent: [
+    { id: 'dashboard',  icon: '📊', label: 'Dashboard' },
+    { id: 'calendar',   icon: '📅', label: 'ตารางเรียน' },
+    { id: 'courses',    icon: '📚', label: 'คอร์สที่ลงทะเบียน' },
+    { id: 'people',     icon: '👥', label: 'ข้อมูลบุตรหลาน' },
+    { id: 'report',     icon: '📋', label: 'ผลการเรียน' },
+  ],
+};
+
+function buildNav() {
+  const nav = document.getElementById('sideNav');
+  const items = NAV_ITEMS[APP.role] || [];
+  nav.innerHTML = items.map(item => `
+    <div class="nav-item" id="nav_${item.id}" onclick="navigateTo('${item.id}')">
+      <span class="nav-icon">${item.icon}</span>
+      <span>${item.label}</span>
+    </div>
+  `).join('');
+}
+
+function navigateTo(page) {
+  APP.currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav_' + page);
+  if (navEl) { navEl.classList.add('active'); document.getElementById('pageTitle').textContent = navEl.querySelector('span:last-child').textContent; }
+  if (window.innerWidth < 768) closeSidebar();
+
+  const content = document.getElementById('pageContent');
+  content.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>กำลังโหลด...</p></div>';
+
+  const pages = {
+    dashboard: renderDashboard,
+    calendar:  renderCalendar,
+    activity:  renderActivity,
+    courses:   renderCourses,
+    finance:   renderFinance,
+    people:    renderPeople,
+    report:    renderReport,
+    receipt:   renderReceipt,
+    users:     renderUsers,
+    pdpa:      renderPdpa,
+  };
+  if (pages[page]) pages[page]();
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── API Helper ─────────────────────────────────────────────────
+async function api(action, payload = {}) {
+  try {
+    const r = await gasCall(action, payload);
+    if (r === null || r === undefined) return [];
+    if (r && r.error === 'unauthorized') {
+      toast('Session หมดอายุ กรุณา Login ใหม่', 'error');
+      setTimeout(doLogout, 1500); return [];
+    }
+    if (r && typeof r === 'object' && r.error && !Array.isArray(r)) {
+      console.warn('[API]', action, r.error); return [];
+    }
+    return r;
+  } catch(e) { console.error('[API fail]', action, e); return []; }
+}
+
+// Safely coerce any value to array
+function arr(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
+
+// ── Toast ──────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  el.className = 'toast ' + type;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 3500);
+}
+
+// ── Modal ──────────────────────────────────────────────────────
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.remove('hidden');
+}
+// อัปเดต content ของ modal ที่เปิดอยู่แล้ว — ใช้ต่อจาก skeleton loader
+function updateModal(html) {
+  const c = document.getElementById('modalContent');
+  if (c) c.innerHTML = html;
+}
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.add('hidden');
+  document.getElementById('modalContent').innerHTML = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  const data = await api('getDashboard');
+  const el = document.getElementById('pageContent');
+
+  if (APP.role === 'admin') {
+    el.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👦</div><div class="stat-value">${data.totalChildren||0}</div><div class="stat-label">เด็กทั้งหมด</div></div>
+        <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-value">${data.totalTrainers||0}</div><div class="stat-label">ผู้ฝึกสอน</div></div>
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value">${data.totalEnrollments||0}</div><div class="stat-label">คอร์สที่ลงทะเบียน</div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${data.todaySessions||0}</div><div class="stat-label">นัดวันนี้</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${data.upcomingSessions||0}</div><div class="stat-label">นัดที่รอ</div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">📅 ปฏิทินวันนี้</span><button class="btn-primary btn-sm" onclick="navigateTo('calendar')">ดูปฏิทิน</button></div>
+      <p class="text-muted text-sm">คลิก "ดูปฏิทิน" เพื่อดูและจัดการตารางทั้งหมด</p></div>`;
+  } else if (APP.role === 'trainer') {
+    el.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${data.todaySessions||0}</div><div class="stat-label">นัดวันนี้</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${data.upcomingSessions||0}</div><div class="stat-label">นัดที่รอ</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${data.completedSessions||0}</div><div class="stat-label">สอนแล้วทั้งหมด</div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">📝 ต้องบันทึกกิจกรรม</span><button class="btn-accent btn-sm" onclick="navigateTo('activity')">ไปบันทึก</button></div>
+      <p class="text-muted text-sm">อย่าลืมบันทึกกิจกรรมหลังสอนแต่ละครั้ง</p></div>`;
+  } else {
+    el.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👦</div><div class="stat-value">${data.myChildren||0}</div><div class="stat-label">บุตรหลาน</div></div>
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value">${data.activeEnrollments||0}</div><div class="stat-label">คอร์สที่ใช้งาน</div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${data.todaySessions||0}</div><div class="stat-label">นัดวันนี้</div></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">📅 ตารางเรียน</span><button class="btn-primary btn-sm" onclick="navigateTo('calendar')">ดูตาราง</button></div>
+      <p class="text-muted text-sm">ดูตารางการฝึกสอนของบุตรหลาน</p></div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════════════════════════
+async function renderCalendar() {
+  // โหลด sessions ทั้งหมดและเก็บไว้ใน APP state
+  APP._calSessions = arr(await api('getSessions', {}));
+  if (!APP.calView) APP.calView = 'month';
+  buildCalendarUI();
+}
+
+// ── สร้าง UI ปฏิทิน (ไม่ fetch ข้อมูลใหม่) ─────────────────────
+function buildCalendarUI() {
+  const sessions = APP._calSessions || [];
+  const el = document.getElementById('pageContent');
+  const d = APP.calDate, view = APP.calView;
+  const y = d.getFullYear(), m = d.getMonth();
+  const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const DAYS = ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+  const today = new Date().toISOString().split('T')[0];
+
+  // ชื่อ title ตาม view
+  let title = '';
+  if (view === 'day')   title = `${d.getDate()} ${MONTHS[m]} ${y+543}`;
+  if (view === 'week')  title = `สัปดาห์ที่ ${getWeekNum(d)} — ${MONTHS[m]} ${y+543}`;
+  if (view === 'month') title = `${MONTHS[m]} ${y+543}`;
+  if (view === 'year')  title = `ปี ${y+543}`;
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-heading">📅 ปฏิทินการฝึกสอน</div>
+      ${APP.role==='admin' ? `<button class="btn-primary" onclick="openAddSession()">+ เพิ่มนัดหมาย</button>` : ''}
+    </div>
+
+    <div class="cal-toolbar">
+      <!-- Navigation -->
+      <div class="cal-nav-center">
+        <button class="btn-secondary btn-sm" onclick="calNav(-1)">‹</button>
+        <span class="cal-title-text">${title}</span>
+        <button class="btn-secondary btn-sm" onclick="calNav(1)">›</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-accent btn-sm" onclick="calGoToday()">วันนี้</button>
+        <!-- Dropdown view switcher -->
+        <div class="cal-view-dropdown">
+          <button class="btn-secondary btn-sm cal-view-toggle-btn" onclick="toggleCalViewMenu(event)">
+            ${{day:'📅 วัน',week:'📅 สัปดาห์',month:'📅 เดือน',year:'📅 ปี'}[view]}
+            <span style="margin-left:4px;font-size:.7rem">▾</span>
+          </button>
+          <div class="cal-view-menu hidden" id="calViewMenu">
+            ${[['day','📅','วัน'],['week','📅','สัปดาห์'],['month','📅','เดือน'],['year','📅','ปี']].map(([v,icon,label]) =>
+              `<div class="cal-view-menu-item ${view===v?'active':''}" onclick="setCalView('${v}');closeCalViewMenu()">
+                ${icon} ${label}
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: ปฏิทิน / Card -->
+    <div class="tab-bar" style="margin-bottom:14px">
+      <button class="tab-btn ${APP.calTab!=='cards'?'active':''}" onclick="switchCalTab('grid')">📅 ปฏิทิน</button>
+      <button class="tab-btn ${APP.calTab==='cards'?'active':''}" onclick="switchCalTab('cards')">🃏 Cards</button>
+    </div>
+
+    <div id="calGridView" class="${APP.calTab==='cards'?'hidden':''}">
+      ${buildGridView(sessions, view, y, m, d, today, DAYS, MONTHS)}
+    </div>
+
+    <div id="calCardsView" class="${APP.calTab!=='cards'?'hidden':''}">
+      ${buildCardsView(sessions, view, d, today)}
+    </div>
+  `;
+}
+
+// ── Grid View (Month/Week/Day/Year) ─────────────────────────────
+function buildGridView(sessions, view, y, m, d, today, DAYS, MONTHS) {
+  if (view === 'month') return buildMonthGrid(sessions, y, m, today, DAYS);
+  if (view === 'week')  return buildWeekGrid(sessions, d, today, DAYS);
+  if (view === 'day')   return buildDayGrid(sessions, d, today);
+  if (view === 'year')  return buildYearGrid(sessions, y, today, MONTHS);
+  return '';
+}
+
+// ── Month Grid ───────────────────────────────────────────────────
+function buildMonthGrid(sessions, y, m, today, DAYS) {
+  const byDate = groupByDate(sessions);
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  let cells = DAYS.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+  for (let i=0; i<firstDay; i++) {
+    const pd = new Date(y, m, -firstDay+i+1);
+    cells += `<div class="cal-day other-month"><div class="cal-day-num">${pd.getDate()}</div></div>`;
+  }
+  for (let day=1; day<=daysInMonth; day++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday = ds === today;
+    const evts = (byDate[ds]||[]);
+    const evtHtml = evts.slice(0,3).map(s =>
+      `<div class="cal-event ${s.status}" onclick="event.stopPropagation();showSessionDetail('${s.id}')">
+        <div class="cal-event-name">${s.startTime||''} ${s.childName||'นัด'} <span class="cal-event-parent">(${s.parentName||''})</span></div>
+        <div class="cal-event-detail">🏅 ${s.trainerName||'-'}${s.location?' · 📍'+s.location:''}</div>
+      </div>`
+    ).join('') + (evts.length>3 ? `<div class="cal-more">+${evts.length-3} เพิ่มเติม</div>` : '');
+    cells += `<div class="cal-day${isToday?' today':''}" onclick="calDayClick('${ds}')">
+      <div class="cal-day-num">${day}</div>${evtHtml}
+    </div>`;
+  }
+  return `<div class="cal-grid">${cells}</div>`;
+}
+
+// ── Week Grid ────────────────────────────────────────────────────
+function buildWeekGrid(sessions, d, today, DAYS) {
+  const ws = getWeekStart(d);
+  const days = Array.from({length:7}, (_,i) => { const x=new Date(ws); x.setDate(ws.getDate()+i); return x; });
+  const byDate = groupByDate(sessions);
+  const header = `<div class="cal-week-header">
+    <div class="cal-week-time-col"></div>
+    ${days.map(day => {
+      const ds = day.toISOString().split('T')[0];
+      const isToday = ds === today;
+      return `<div class="cal-week-col-header${isToday?' today':''}">
+        <div class="cal-week-day-name">${DAYS[day.getDay()]}</div>
+        <div class="cal-week-day-num${isToday?' today':''}">${day.getDate()}</div>
+        ${(byDate[ds]||[]).length ? `<div class="cal-week-count">${(byDate[ds]||[]).length} นัด</div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>`;
+  const hours = Array.from({length:14}, (_,i)=>i+7); // 07:00-20:00
+  const rows = hours.map(h => {
+    const hStr = String(h).padStart(2,'0');
+    const cells = days.map(day => {
+      const ds = day.toISOString().split('T')[0];
+      const evts = (byDate[ds]||[]).filter(s => {
+        const h2 = parseInt((s.startTime||'00:00').split(':')[0]);
+        return h2 === h;
+      });
+      return `<div class="cal-week-cell" onclick="calDayClick('${ds}')">
+        ${evts.map(s => `<div class="cal-week-event ${s.status}" onclick="event.stopPropagation();showSessionDetail('${s.id}')">
+          <div class="cal-event-name">${s.startTime||''}${s.endTime?'-'+s.endTime:''} ${s.childName||''} <span class="cal-event-parent">(${s.parentName||''})</span></div>
+          <div class="cal-event-detail">📚 ${s.courseName||''}</div>
+          <div class="cal-event-detail">🏅 ${s.trainerName||'-'}${s.location?' · 📍'+s.location:''}</div>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+    return `<div class="cal-week-row">
+      <div class="cal-week-time">${hStr}:00</div>${cells}
+    </div>`;
+  }).join('');
+  return `<div class="cal-week-wrap">${header}<div class="cal-week-body">${rows}</div></div>`;
+}
+
+// ── Day Grid ─────────────────────────────────────────────────────
+function buildDayGrid(sessions, d, today) {
+  const ds = d.toISOString().split('T')[0];
+  const daySessions = sessions.filter(s => (s.date||'').split('T')[0] === ds)
+    .sort((a,b) => (a.startTime||'').localeCompare(b.startTime||''));
+  if (!daySessions.length) return `<div class="cal-empty">ไม่มีนัดหมายในวันนี้</div>`;
+  return `<div class="cal-day-list">
+    ${daySessions.map(s => buildSessionCard(s, 'day')).join('')}
+  </div>`;
+}
+
+// ── Year Grid ────────────────────────────────────────────────────
+function buildYearGrid(sessions, y, today, MONTHS) {
+  const byMonth = {};
+  sessions.forEach(s => {
+    const dt = (s.date||'').split('T')[0];
+    if (!dt || !dt.startsWith(y)) return;
+    const mo = parseInt(dt.split('-')[1])-1;
+    if (!byMonth[mo]) byMonth[mo] = [];
+    byMonth[mo].push(s);
+  });
+  return `<div class="cal-year-grid">
+    ${MONTHS.map((name, mi) => {
+      const count = (byMonth[mi]||[]).length;
+      const ds = `${y}-${String(mi+1).padStart(2,'0')}`;
+      return `<div class="cal-year-month${count?'':' cal-year-empty'}"
+        onclick="APP.calDate=new Date(${y},${mi},1);setCalView('month')">
+        <div class="cal-year-month-name">${name}</div>
+        ${count ? `<div class="cal-year-count">${count} นัด</div>
+          <div class="cal-year-status">
+            ${(byMonth[mi]||[]).filter(s=>s.status==='completed').length} ✅
+            ${(byMonth[mi]||[]).filter(s=>s.status==='scheduled').length} 📅
+            ${(byMonth[mi]||[]).filter(s=>s.status==='cancelled').length ? (byMonth[mi]||[]).filter(s=>s.status==='cancelled').length+' ❌' : ''}
+          </div>` : `<div class="cal-year-count" style="opacity:.4">ไม่มีนัด</div>`}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── Cards View ───────────────────────────────────────────────────
+function buildCardsView(sessions, view, d, today) {
+  let filtered = sessions.filter(s => s.status !== 'cancelled');
+  const ds = d.toISOString().split('T')[0];
+  const y = d.getFullYear(), m = d.getMonth();
+  const ws = getWeekStart(d);
+  const we = new Date(ws); we.setDate(ws.getDate()+6);
+  const weStr = we.toISOString().split('T')[0];
+
+  if (view === 'day')   filtered = filtered.filter(s => (s.date||'').split('T')[0] === ds);
+  if (view === 'week')  filtered = filtered.filter(s => s.date >= ws.toISOString().split('T')[0] && s.date <= weStr);
+  if (view === 'month') filtered = filtered.filter(s => s.date && s.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`));
+  if (view === 'year')  filtered = filtered.filter(s => s.date && s.date.startsWith(`${y}-`));
+
+  filtered.sort((a,b) => (a.date+a.startTime).localeCompare(b.date+b.startTime));
+
+  if (!filtered.length) return `<div class="cal-empty">ไม่มีนัดหมายในช่วงเวลานี้</div>`;
+
+  // จัดกลุ่มตามวัน
+  const byDate = {};
+  filtered.forEach(s => {
+    const k = (s.date||'').split('T')[0];
+    if (!byDate[k]) byDate[k] = [];
+    byDate[k].push(s);
+  });
+
+  const MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return Object.entries(byDate).map(([date, daySessions]) => {
+    const dt = new Date(date);
+    const isToday = date === today;
+    const isPast  = date < today;
+    return `<div class="cal-cards-group">
+      <div class="cal-cards-date-header ${isToday?'today':''}${isPast?' past':''}">
+        <span class="cal-cards-day-num">${dt.getDate()}</span>
+        <span class="cal-cards-month">${MONTHS_SHORT[dt.getMonth()]} ${dt.getFullYear()+543}</span>
+        <span class="cal-cards-day-name">${['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'][dt.getDay()]}</span>
+        ${isToday ? '<span class="cal-cards-today-badge">วันนี้</span>' : ''}
+        <span class="cal-cards-count">${daySessions.length} นัด</span>
+      </div>
+      <div class="cal-cards-day-sessions">
+        ${daySessions.map(s => buildSessionCard(s, view)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Session Card Component ────────────────────────────────────────
+function buildSessionCard(s, view) {
+  const statusColor = {completed:'var(--c-success)',scheduled:'var(--c-warning)',cancelled:'var(--c-muted)'}[s.status]||'var(--c-muted)';
+  const statusLabel = {completed:'✅ สอนแล้ว',scheduled:'📅 นัดแล้ว',cancelled:'❌ ยกเลิก'}[s.status]||s.status;
+  // Cards อยู่ใต้ header วันที่อยู่แล้ว แสดงแค่เวลา
+  const timeDisplay = `${s.startTime||''}${s.endTime?' - '+s.endTime:''}`;
+  return `<div class="session-card status-${s.status}" onclick="showSessionDetail('${s.id}')">
+    <div class="session-card-stripe" style="background:${statusColor}"></div>
+    <div class="session-card-content">
+      <div class="session-card-top">
+        <div class="session-card-time">${timeDisplay}</div>
+        <span class="badge ${s.status==='completed'?'badge-success':s.status==='scheduled'?'badge-warning':'badge-muted'}">${statusLabel}</span>
+      </div>
+      <div class="session-card-title">${s.childName||'-'}</div>
+      <div class="session-card-parent-row">👨‍👩‍👧 ${s.parentName||'-'}</div>
+      <div class="session-card-meta">
+        <span>📚 ${s.courseName||'-'}</span>
+        <span>🏅 ${s.trainerName||'-'}</span>
+        ${s.location ? `<span>📍 ${s.location}</span>` : ''}
+        ${s.notes ? `<span>📝 ${s.notes}</span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function fmtDateShort(dt) {
+  if (!dt) return '';
+  const p = dt.split('T')[0].split('-');
+  const MONTHS_S = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${parseInt(p[2])} ${MONTHS_S[parseInt(p[1])-1]}`;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+function groupByDate(sessions) {
+  const map = {};
+  sessions.forEach(s => {
+    const k = (s.date||'').split('T')[0];
+    if (!map[k]) map[k] = [];
+    map[k].push(s);
+  });
+  return map;
+}
+function getWeekStart(d) {
+  const s = new Date(d); s.setDate(d.getDate()-d.getDay()); return s;
+}
+function getWeekNum(d) {
+  const s = new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);
+}
+
+// ── Controls ─────────────────────────────────────────────────────
+function toggleCalViewMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('calViewMenu');
+  if (menu) menu.classList.toggle('hidden');
+}
+function closeCalViewMenu() {
+  const menu = document.getElementById('calViewMenu');
+  if (menu) menu.classList.add('hidden');
+}
+// ปิด dropdown เมื่อคลิกที่อื่น
+document.addEventListener('click', () => closeCalViewMenu());
+
+function setCalView(v) {
+  APP.calView = v;
+  buildCalendarUI();
+}
+
+
+function switchCalTab(tab) {
+  APP.calTab = tab;
+  buildCalendarUI();
+}
+function calNav(dir) {
+  const v = APP.calView;
+  if (v==='day')   APP.calDate.setDate(APP.calDate.getDate()+dir);
+  if (v==='week')  APP.calDate.setDate(APP.calDate.getDate()+dir*7);
+  if (v==='month') APP.calDate.setMonth(APP.calDate.getMonth()+dir);
+  if (v==='year')  APP.calDate.setFullYear(APP.calDate.getFullYear()+dir);
+  buildCalendarUI();
+}
+function calGoToday() {
+  APP.calDate = new Date();
+  buildCalendarUI();
+}
+function calDayClick(dateStr) {
+  // ใช้ T00:00:00 เพื่อป้องกัน timezone offset ทำให้วันเลื่อนไปวันก่อนหน้า
+  APP.calDate = new Date(dateStr + 'T00:00:00');
+  if (APP.calView !== 'day') {
+    APP.calView = 'day';
+    buildCalendarUI();
+  } else if (APP.role === 'admin') {
+    openAddSession(dateStr);
+  }
+}
+
+
+async function showDaySessions(dateStr) {
+  const sessions = arr(await api('getSessions', { startDate: dateStr, endDate: dateStr }));
+  if (!sessions.length) { toast('ไม่มีนัดหมายในวันนี้', 'error'); return; }
+  openModal(`
+    <div class="modal-title">📅 นัดหมายวันที่ ${dateStr}</div>
+    ${sessions.map(s => `
+      <div class="session-item">
+        <div class="session-info">
+          <div class="session-name">${s.childName||''} — ${s.courseName||''}</div>
+          <div class="session-meta">🕐 ${s.startTime||''} - ${s.endTime||''} &nbsp; 👤 ${s.trainerName||''}</div>
+          <div class="session-meta">📍 ${s.location||'-'}</div>
+        </div>
+        <span class="badge ${statusBadge(s.status)}">${statusLabel(s.status)}</span>
+      </div>`).join('')}
+  `);
+}
+
+async function showSessionDetail(id) {
+  // ใช้ session ที่ cache ไว้ก่อน ถ้าไม่มีค่อย fetch ใหม่
+  let sessions = APP._calSessions || [];
+  let s = sessions.find(x => x.id === id);
+  if (!s) {
+    sessions = arr(await api('getSessions', {}));
+    s = sessions.find(x => x.id === id);
+  }
+  if (!s) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const isPast = s.date < today;
+  const canEdit = APP.role === 'admin' && s.status === 'scheduled';
+
+  const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const dateParts = (s.date||'').split('-');
+  const dateDisplay = dateParts.length===3
+    ? `${parseInt(dateParts[2])} ${MONTHS[parseInt(dateParts[1])-1]} ${parseInt(dateParts[0])+543}`
+    : s.date||'-';
+
+  openModal(`
+    <div class="modal-title">📌 รายละเอียดนัดหมาย</div>
+
+    <!-- Status badge -->
+    <div style="margin-bottom:14px">
+      <span class="badge ${statusBadge(s.status)}" style="font-size:.88rem">${statusLabel(s.status)}</span>
+    </div>
+
+    <!-- ข้อมูลหลัก -->
+    <div class="session-detail-grid">
+      <div class="session-detail-item">
+        <div class="session-detail-label">👦 เด็ก</div>
+        <div class="session-detail-value">${s.childName||'-'}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">👨‍👩‍👧 ผู้ปกครอง</div>
+        <div class="session-detail-value">${s.parentName||'-'}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">📚 คอร์ส</div>
+        <div class="session-detail-value">${s.courseName||'-'}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">🏅 Trainer</div>
+        <div class="session-detail-value">${s.trainerName||'-'}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">📅 วันที่</div>
+        <div class="session-detail-value">${dateDisplay}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">🕐 เวลา</div>
+        <div class="session-detail-value">${s.startTime||'-'}${s.endTime?' — '+s.endTime:''}</div>
+      </div>
+      <div class="session-detail-item">
+        <div class="session-detail-label">📍 สถานที่</div>
+        <div class="session-detail-value">${s.location||'-'}</div>
+      </div>
+      ${s.notes ? `<div class="session-detail-item session-detail-full">
+        <div class="session-detail-label">📝 หมายเหตุ</div>
+        <div class="session-detail-value">${s.notes}</div>
+      </div>` : ''}
+      ${s.cancelReason ? `<div class="session-detail-item session-detail-full">
+        <div class="session-detail-label" style="color:var(--c-danger)">เหตุผลการยกเลิก</div>
+        <div class="session-detail-value" style="color:var(--c-danger)">${s.cancelReason}</div>
+      </div>` : ''}
+    </div>
+
+    ${canEdit ? `
+    <div class="form-actions">
+      <button class="btn-danger btn-sm" onclick="closeModal();openCancelSession('${id}')">❌ ยกเลิกนัด</button>
+      <button class="btn-secondary" onclick="closeModal();openEditSession('${id}')">✏️ แก้ไข</button>
+      <button class="btn-secondary btn-sm" onclick="closeModal();confirmDeleteSession('${id}')">🗑 ลบ</button>
+    </div>` : ''}
+  `);
+}
+
+// ── แก้ไขนัดหมาย ────────────────────────────────────────────────
+async function openEditSession(id) {
+  let sessions = APP._calSessions || [];
+  let s = sessions.find(x => x.id === id);
+  if (!s) {
+    sessions = arr(await api('getSessions', {}));
+    s = sessions.find(x => x.id === id);
+  }
+  if (!s) { toast('ไม่พบนัดหมาย', 'error'); return; }
+
+  const [trainers, children, enrollments, courses] = await Promise.all([
+    api('getTrainers',{}), api('getChildren',{}), api('getEnrollments',{}), api('getCourses',{})
+  ]);
+
+  const trainerOpts = arr(trainers).map(t =>
+    `<option value="${t.id}"${t.id===s.trainerId?' selected':''}>${t.name}</option>`
+  ).join('');
+
+  openModal(`
+    <div class="modal-title">✏️ แก้ไขนัดหมาย</div>
+    <div style="background:var(--c-surface2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:.88rem">
+      <span style="color:var(--c-muted)">นัดของ</span>
+      <strong style="margin:0 6px">${s.childName||'-'}</strong>
+      <span style="color:var(--c-muted)">·</span>
+      <span style="margin-left:6px;color:var(--c-muted)">👨‍👩‍👧 ${s.parentName||'-'}</span>
+      <span style="float:right;color:var(--c-primary)">📚 ${s.courseName||'-'}</span>
+    </div>
+    <div class="form-group"><label>วันที่</label>
+      <input type="date" id="es_date" value="${s.date||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>เวลาเริ่ม</label>
+        <input type="time" id="es_start" value="${s.startTime||'09:00'}"></div>
+      <div class="form-group"><label>เวลาสิ้นสุด</label>
+        <input type="time" id="es_end" value="${s.endTime||'10:00'}"></div>
+    </div>
+    <div class="form-group"><label>ผู้ฝึกสอน</label>
+      <select id="es_trainer"><option value="">-- เลือก --</option>${trainerOpts}</select></div>
+    <div class="form-group"><label>สถานที่</label>
+      <input type="text" id="es_location" value="${s.location||''}"></div>
+    <div class="form-group"><label>หมายเหตุ</label>
+      <textarea id="es_notes">${s.notes||''}</textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitEditSession('${id}')">💾 บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitEditSession(id) {
+  const payload = {
+    id,
+    date:      document.getElementById('es_date')?.value,
+    startTime: document.getElementById('es_start')?.value,
+    endTime:   document.getElementById('es_end')?.value,
+    trainerId: document.getElementById('es_trainer')?.value,
+    location:  document.getElementById('es_location')?.value,
+    notes:     document.getElementById('es_notes')?.value,
+  };
+  if (!payload.date) { toast('กรุณาระบุวันที่', 'error'); return; }
+  const r = await apiRaw('updateSession', payload);
+  if (r && r.error) { toast('เกิดข้อผิดพลาด: ' + r.error, 'error'); return; }
+  toast('อัปเดตนัดหมายแล้ว ✓');
+  closeModal();
+  // refresh calendar
+  APP._calSessions = arr(await api('getSessions', {}));
+  buildCalendarUI();
+}
+
+async function openAddSession(dateStr = '') {
+  let [trainers, children, enrollments, courses] = await Promise.all([
+    api('getTrainers'), api('getChildren', {}), api('getEnrollments', {}), api('getCourses', {})
+  ]);
+  trainers = arr(trainers); children = arr(children); enrollments = arr(enrollments); courses = arr(courses);
+  openModal(`
+    <div class="modal-title">+ เพิ่มนัดหมาย</div>
+    <div class="form-group"><label>วันที่</label><input type="date" id="sDate" value="${dateStr}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>เวลาเริ่ม</label><input type="time" id="sStart" value="09:00"></div>
+      <div class="form-group"><label>เวลาสิ้นสุด</label><input type="time" id="sEnd" value="10:00"></div>
+    </div>
+    <div class="form-group"><label>ผู้ฝึกสอน</label>
+      <select id="sTrainer"><option value="">-- เลือก --</option>${trainers.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>เด็ก</label>
+      <select id="sChild" onchange="filterEnrollments(this.value)"><option value="">-- เลือกเด็กก่อน --</option>${children.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Enrollment (คอร์ส)</label>
+      <select id="sEnroll"><option value="">-- เลือกเด็กก่อน --</option></select></div>
+    <div class="form-group"><label>สถานที่</label><input type="text" id="sLoc" placeholder="ห้องฝึก A"></div>
+    <div class="form-group"><label>หมายเหตุ</label><textarea id="sNote"></textarea></div>
+    <div id="_enrData" style="display:none">${JSON.stringify(enrollments)}</div>
+    <div id="_crsData" style="display:none">${JSON.stringify(courses)}</div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitAddSession()">บันทึกนัด</button>
+    </div>
+  `);
+}
+
+function filterEnrollments(childId) {
+  const enrollments = JSON.parse(document.getElementById('_enrData').textContent);
+  const courses = JSON.parse(document.getElementById('_crsData').textContent);
+  const sel = document.getElementById('sEnroll');
+  const mine = enrollments.filter(e => e.childId === childId);
+  sel.innerHTML = mine.map(e => {
+    const c = courses.find(c => c.id === e.courseId) || {};
+    return `<option value="${e.id}">${c.name||e.courseId} (${e.status})</option>`;
+  }).join('') || '<option value="">ไม่มี Enrollment</option>';
+}
+
+async function submitAddSession() {
+  const payload = {
+    date: document.getElementById('sDate').value,
+    startTime: document.getElementById('sStart').value,
+    endTime: document.getElementById('sEnd').value,
+    trainerId: document.getElementById('sTrainer').value,
+    enrollmentId: document.getElementById('sEnroll').value,
+    location: document.getElementById('sLoc').value,
+    notes: document.getElementById('sNote').value,
+  };
+  if (!payload.date || !payload.enrollmentId) { toast('กรุณากรอกข้อมูลให้ครบ', 'error'); return; }
+  // ใช้ apiRaw เพื่อรับ error จาก backend ได้จริง ไม่ถูก normalize เป็น []
+  const r = await apiRaw('createSession', payload);
+  if (r && r.error) { toast('เกิดข้อผิดพลาด: ' + r.error, 'error'); return; }
+  toast('เพิ่มนัดหมายสำเร็จ');
+  closeModal();
+  renderCalendar();
+}
+
+// เปลี่ยนชื่อเป็น confirmDeleteSession เพื่อป้องกัน namespace ชนกับ backend deleteSession
+async function confirmDeleteSession(id) {
+  if (!confirm('ยืนยันการลบนัดหมายนี้?')) return;
+  const r = await apiRaw('deleteSession', { id });
+  if (r && r.error) { toast(r.error, 'error'); return; }
+  toast('ลบนัดหมายแล้ว');
+  closeModal();
+  renderCalendar();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ACTIVITY LOG
+// ══════════════════════════════════════════════════════════════
+const SKILL_LIST = ['การทรงตัว','ประสานงาน','ความยืดหยุ่น','ความแข็งแรง','ความเร็ว','สมาธิ','การออกคำสั่ง','ทักษะสังคม','ความกล้า','ความสนุก'];
+
+async function renderActivity() {
+  const el = document.getElementById('pageContent');
+  if (APP.role === 'trainer') {
+    const items = arr(await api('getPendingActivities'));
+    const pending = items.filter(i => !i.logged);
+    const done = items.filter(i => i.logged);
+
+    el.innerHTML = `
+      <div class="page-header"><div class="page-heading">📝 บันทึกกิจกรรม</div></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchActivityTab(this,'pending')">ยังไม่บันทึก (${pending.length})</button>
+        <button class="tab-btn" onclick="switchActivityTab(this,'done')">บันทึกแล้ว (${done.length})</button>
+      </div>
+      <div id="actPending">${renderSessionItems(pending, false)}</div>
+      <div id="actDone" class="hidden">${renderSessionItems(done, true)}</div>`;
+  } else if (APP.role === 'admin') {
+    const sessions = arr(await api('getSessions', {}));
+    const completed = sessions.filter(s => s.status === 'completed');
+    el.innerHTML = `
+      <div class="page-header"><div class="page-heading">📝 บันทึกกิจกรรมทั้งหมด</div></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>วันที่</th><th>เด็ก</th><th>คอร์ส</th><th>ผู้ฝึกสอน</th><th>สถานะ</th><th>Actions</th>
+      </tr></thead><tbody>
+      ${completed.map(s=>`<tr>
+        <td>${s.date||'-'}</td><td>${s.childName||'-'}</td><td>${s.courseName||'-'}</td>
+        <td>${s.trainerName||'-'}</td><td><span class="badge badge-success">สอนแล้ว</span></td>
+        <td><button class="btn-icon" onclick="viewActivityLog('${s.id}')">👁 ดู</button></td>
+      </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+}
+
+function renderSessionItems(items, logged) {
+  if (!items.length) return `<p class="text-muted" style="text-align:center;padding:32px;">${logged?'ยังไม่มีรายการที่บันทึก':'ไม่มีรายการที่รอบันทึก 🎉'}</p>`;
+  return items.map(s => `
+    <div class="session-item">
+      <div class="session-date">
+        <div class="day">${(s.date||'').split('-')[2]||''}</div>
+        <div class="month">${monthShort(s.date)}</div>
+      </div>
+      <div class="session-divider"></div>
+      <div class="session-info">
+        <div class="session-name">${s.childName||''}</div>
+        <div class="session-meta">📚 ${s.courseName||''} &nbsp; 🕐 ${s.startTime||''}</div>
+      </div>
+      <div class="session-actions">
+        ${logged
+          ? `<button class="btn-secondary btn-sm" onclick="viewActivityLog('${s.id}')">👁 ดู</button>`
+          : `<button class="btn-primary btn-sm"
+              data-sid="${s.id}"
+              data-child="${(s.childName||'').replace(/"/g,'&quot;')}"
+              data-course="${(s.courseName||'').replace(/"/g,'&quot;')}"
+              onclick="openActivityForm(this.dataset.sid,this.dataset.child,this.dataset.course)">📝 บันทึก</button>`}
+      </div>
+    </div>`).join('');
+}
+
+function switchActivityTab(btn, which) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('actPending').classList.toggle('hidden', which !== 'pending');
+  document.getElementById('actDone').classList.toggle('hidden', which !== 'done');
+}
+
+function openActivityForm(sessionId, childName, courseName) {
+  let selectedSkills = [];
+  let rating = 0;
+  openModal(`
+    <div class="modal-title">📝 บันทึกกิจกรรม</div>
+    <p class="text-muted text-sm" style="margin-bottom:16px">${childName} — ${courseName}</p>
+    <div class="form-group"><label>บันทึกสรุปการเรียน</label>
+      <textarea id="actNote" rows="4" placeholder="อธิบายกิจกรรมที่ทำ พัฒนาการ..."></textarea></div>
+    <div class="form-group"><label>ทักษะที่ฝึก</label>
+      <div class="skill-chips" id="skillChips">
+        ${SKILL_LIST.map(sk=>`<div class="skill-chip" onclick="toggleSkill(this,'${sk}')">${sk}</div>`).join('')}
+      </div></div>
+    <div class="form-group"><label>คะแนนการเรียน</label>
+      <div class="star-rating" id="starRating">
+        ${[1,2,3,4,5].map(n=>`<button class="star-btn" onclick="setRating(${n})">★</button>`).join('')}
+      </div></div>
+    <input type="hidden" id="actSessionId" value="${sessionId}">
+    <input type="hidden" id="actRating" value="0">
+    <input type="hidden" id="actSkills" value="">
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitActivity()">บันทึก ✓</button>
+    </div>
+  `);
+}
+
+function toggleSkill(el, sk) {
+  el.classList.toggle('selected');
+  const skills = Array.from(document.querySelectorAll('.skill-chip.selected')).map(c => c.textContent);
+  document.getElementById('actSkills').value = skills.join(',');
+}
+
+function setRating(n) {
+  document.getElementById('actRating').value = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i < n);
+  });
+}
+
+async function submitActivity() {
+  const payload = {
+    sessionId: document.getElementById('actSessionId').value,
+    note: document.getElementById('actNote').value,
+    skills: document.getElementById('actSkills').value,
+    rating: document.getElementById('actRating').value,
+  };
+  if (!payload.note) { toast('กรุณาเขียนบันทึกสรุป', 'error'); return; }
+  await api('saveActivity', payload);
+  toast('บันทึกกิจกรรมสำเร็จ ✓');
+  closeModal();
+  renderActivity();
+}
+
+async function viewActivityLog(sessionId) {
+  const logs = await api('getActivityLog', { sessionId });
+  if (!logs.length) { toast('ยังไม่มีบันทึก', 'error'); return; }
+  const log = logs[0];
+  openModal(`
+    <div class="modal-title">📖 บันทึกกิจกรรม</div>
+    <div class="form-group"><label class="text-muted text-sm">บันทึกสรุป</label><p>${log.note||'-'}</p></div>
+    <div class="form-group"><label class="text-muted text-sm">ทักษะที่ฝึก</label>
+      <div class="skill-chips">${(log.skills||'').split(',').filter(Boolean).map(s=>`<span class="skill-chip selected">${s}</span>`).join('')||'-'}</div></div>
+    <div class="form-group"><label class="text-muted text-sm">คะแนน</label>
+      <div class="rating-stars">${'★'.repeat(Number(log.rating)||0)}${'☆'.repeat(5-(Number(log.rating)||0))}</div></div>
+    <p class="text-muted text-sm">บันทึกเมื่อ: ${log.createdAt||''}</p>
+  `);
+}
+
+// ══════════════════════════════════════════════════════════════
+// COURSES
+// ══════════════════════════════════════════════════════════════
+async function renderCourses() {
+  let [courses, enrollments, children] = await Promise.all([
+    api('getCourses', {}), api('getEnrollments', {}), api('getChildren', {})
+  ]);
+  courses = arr(courses); enrollments = arr(enrollments); children = arr(children);
+  const el = document.getElementById('pageContent');
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div><div class="page-heading">📚 ระบบคอร์ส</div></div>
+      ${APP.role==='admin'?`<div class="flex gap-2">
+        <button class="btn-secondary" onclick="openCourseForm()">+ เพิ่มคอร์ส</button>
+        <button class="btn-primary" onclick="openEnrollForm()">+ ลงทะเบียนคอร์ส</button>
+      </div>`:''}
+    </div>
+    ${APP.role==='admin'?`
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><span class="card-title">คอร์สทั้งหมด</span></div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>ชื่อคอร์ส</th><th>ราคา</th><th>ค่าสอน/ครั้ง</th><th>หมวด</th><th></th>
+      </tr></thead><tbody>
+      ${courses.map(c=>`<tr>
+        <td><div class="font-bold">${c.name}</div><div class="text-muted text-sm">${c.description||''}</div></td>
+        <td>฿${(c.price||0).toLocaleString()}</td><td>฿${(c.trainerFee||0).toLocaleString()}</td>
+        <td><span class="badge badge-muted">${c.category||'-'}</span></td>
+        <td><button class="btn-icon" onclick="openCourseForm('${c.id}')">✏️</button></td>
+      </tr>`).join('')}
+      </tbody></table></div>
+    </div>`:''}
+    <div class="card-title" style="margin-bottom:12px">📋 Enrollment ทั้งหมด</div>
+    <div class="table-wrap"><table><thead><tr>
+      <th>เด็ก</th><th>คอร์ส</th><th>สอนแล้ว</th><th>ระหว่างนัด</th><th>คงเหลือ</th><th>ความคืบหน้า</th><th></th>
+    </tr></thead><tbody>
+    ${arr(enrollments).map(e=>{
+      const child = children.find(c=>c.id===e.childId)||{};
+      const course = courses.find(c=>c.id===e.courseId)||{};
+      const total = Number(e.totalSessions)||0;
+      const used = course.usedSessions||0;
+      const sched = course.scheduledSessions||0;
+      const rem = total - used - sched;
+      const pct = total > 0 ? Math.round(used/total*100) : 0;
+      return `<tr>
+        <td><span class="font-bold">${child.name||e.childId}</span></td>
+        <td>${course.name||e.courseId}</td>
+        <td><span class="badge badge-success">${used} ครั้ง</span></td>
+        <td><span class="badge badge-warning">${sched} ครั้ง</span></td>
+        <td><span class="badge ${rem<=2?'badge-danger':'badge-primary'}">${rem} ครั้ง</span></td>
+        <td style="min-width:120px"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="text-muted text-sm">${pct}%</div></td>
+        <td><button class="btn-secondary btn-sm" onclick="showCourseHistory('${e.id}')">📖 ประวัติ</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+}
+
+async function showCourseHistory(enrollmentId) {
+  const history = arr(await api('getCourseHistory', { enrollmentId }));
+  openModal(`
+    <div class="modal-title">📖 ประวัติการฝึกสอน</div>
+    ${!history.length ? '<p class="text-muted">ยังไม่มีประวัติ</p>' : `
+    <div class="table-wrap"><table><thead><tr>
+      <th>#</th><th>วันที่</th><th>ผู้ฝึกสอน</th><th>สถานะ</th><th>บันทึก</th><th>คะแนน</th>
+    </tr></thead><tbody>
+    ${history.map((h,i)=>`<tr>
+      <td>${i+1}</td><td>${h.date||'-'}</td><td>${h.trainerName||'-'}</td>
+      <td><span class="badge ${statusBadge(h.status)}">${statusLabel(h.status)}</span></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${h.activityNote||'-'}</td>
+      <td>${h.rating?'★'.repeat(Number(h.rating)):'-'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`}
+  `);
+}
+
+async function openCourseForm(id = null) {
+  let course = {};
+  if (id) {
+    const courses = arr(await api('getCourses', {}));
+    course = courses.find(c => c.id === id) || {};
+  }
+  openModal(`
+    <div class="modal-title">${id?'✏️ แก้ไขคอร์ส':'+ เพิ่มคอร์ส'}</div>
+    <div class="form-group"><label>ชื่อคอร์ส</label><input type="text" id="cName" value="${course.name||''}"></div>
+    <div class="form-group"><label>คำอธิบาย</label><textarea id="cDesc">${course.description||''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>ราคาคอร์ส (฿)</label><input type="number" id="cPrice" value="${course.price||''}"></div>
+      <div class="form-group"><label>ค่าตอบแทนผู้สอน/ครั้ง (฿)</label><input type="number" id="cFee" value="${course.trainerFee||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>จำนวนครั้ง</label><input type="number" id="cSessions" value="${course.totalSessions||''}"></div>
+      <div class="form-group"><label>หมวด</label><input type="text" id="cCat" value="${course.category||''}"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitCourse('${id||''}')">บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitCourse(id) {
+  const payload = {
+    name: document.getElementById('cName').value,
+    description: document.getElementById('cDesc').value,
+    price: document.getElementById('cPrice').value,
+    trainerFee: document.getElementById('cFee').value,
+    totalSessions: document.getElementById('cSessions').value,
+    category: document.getElementById('cCat').value,
+  };
+  if (id) payload.id = id;
+  // ใช้ apiRaw เพื่อรับ error ได้จริง
+  const r = await apiRaw(id ? 'updateCourse' : 'createCourse', payload);
+  if (r && r.error) { toast('เกิดข้อผิดพลาด: ' + r.error, 'error'); return; }
+  toast(id ? 'อัปเดตคอร์สแล้ว' : 'เพิ่มคอร์สแล้ว');
+  closeModal();
+  renderCourses();
+}
+
+async function openEnrollForm() {
+  let [children, courses] = await Promise.all([api('getChildren', {}), api('getCourses', {})]);
+  children = arr(children); courses = arr(courses);
+  if (!children.length) { toast('ยังไม่มีข้อมูลเด็ก กรุณาเพิ่มเด็กก่อน', 'error'); return; }
+  if (!courses.length)  { toast('ยังไม่มีคอร์ส กรุณาเพิ่มคอร์สก่อน', 'error'); return; }
+
+  const childOpts = children.map(c =>
+    `<option value="${c.id}">${c.name}${c.nickname ? ' (' + c.nickname + ')' : ''}</option>`
+  ).join('');
+  const courseOpts = courses.map(c =>
+    `<option value="${c.id}" data-sessions="${c.totalSessions||0}">${c.name}</option>`
+  ).join('');
+
+  openModal(`
+    <div class="modal-title">+ ลงทะเบียนคอร์ส</div>
+    <div class="form-group"><label>เด็ก</label>
+      <select id="eChild"><option value="">-- เลือกเด็ก --</option>${childOpts}</select></div>
+    <div class="form-group"><label>คอร์ส</label>
+      <select id="eCourse" onchange="fillEnrollSessions(this)"><option value="">-- เลือกคอร์ส --</option>${courseOpts}</select></div>
+    <div class="form-group"><label>จำนวนครั้ง</label><input type="number" id="eSessions"></div>
+    <div class="form-group"><label>วันเริ่มต้น</label><input type="date" id="eStart"></div>
+    <div class="form-group"><label>หมายเหตุ</label><textarea id="eNote"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitEnroll()">ลงทะเบียน</button>
+    </div>
+  `);
+  document.getElementById('eSessions').value = courses[0]?.totalSessions || '';
+}
+
+function fillEnrollSessions(sel) {
+  document.getElementById('eSessions').value = sel.options[sel.selectedIndex].dataset.sessions || '';
+}
+
+async function submitEnroll() {
+  const payload = {
+    childId: document.getElementById('eChild').value,
+    courseId: document.getElementById('eCourse').value,
+    totalSessions: document.getElementById('eSessions').value,
+    startDate: document.getElementById('eStart').value,
+    notes: document.getElementById('eNote').value,
+    status: 'active',
+  };
+  if (!payload.childId || !payload.courseId) { toast('กรุณาเลือกเด็กและคอร์ส', 'error'); return; }
+  // ใช้ apiRaw เพื่อรับ error ได้จริง
+  const r = await apiRaw('createEnrollment', payload);
+  if (r && r.error) { toast('เกิดข้อผิดพลาด: ' + r.error, 'error'); return; }
+  toast('ลงทะเบียนคอร์สสำเร็จ');
+  closeModal();
+  renderCourses();
+}
+
+// ══════════════════════════════════════════════════════════════
+// FINANCE
+// ══════════════════════════════════════════════════════════════
+async function renderFinance() {
+  let [trainers, children] = await Promise.all([
+    APP.role === 'admin' ? api('getTrainers') : Promise.resolve([]),
+    api('getChildren', {})
+  ]);
+  trainers = arr(trainers); children = arr(children);
+  const el = document.getElementById('pageContent');
+
+  el.innerHTML = `
+    <div class="page-header"><div class="page-heading">💰 ${APP.role==='trainer'?'รายได้ของฉัน':'ระบบการเงิน'}</div></div>
+    <div class="filter-bar">
+      <input type="date" id="fStart" placeholder="วันเริ่มต้น">
+      <input type="date" id="fEnd" placeholder="วันสิ้นสุด">
+      ${APP.role==='admin'?`<select id="fTrainer"><option value="">ผู้ฝึกสอนทั้งหมด</option>${trainers.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}</select>`:''}
+      <select id="fChild"><option value="">เด็กทั้งหมด</option>${children.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+      <select id="fStatus"><option value="">สถานะทั้งหมด</option><option value="scheduled">ระหว่างนัด</option><option value="completed">สอนแล้ว</option></select>
+      <button class="btn-primary btn-sm" onclick="loadFinance()">🔍 ค้นหา</button>
+    </div>
+    <div id="financeSummary" class="finance-summary"></div>
+    <div class="card"><div id="financeTable"></div></div>`;
+  loadFinance();
+}
+
+async function loadFinance() {
+  const payload = {
+    startDate: document.getElementById('fStart')?.value,
+    endDate: document.getElementById('fEnd')?.value,
+    trainerId: document.getElementById('fTrainer')?.value,
+    childId: document.getElementById('fChild')?.value,
+    status: document.getElementById('fStatus')?.value,
+  };
+  const rows = arr(await api('getFinance', payload));
+
+  const totalFee = rows.filter(r=>r.status==='completed').reduce((s,r)=>s+Number(r.fee||0),0);
+  const paid = rows.filter(r=>r.paymentStatus==='paid').reduce((s,r)=>s+Number(r.fee||0),0);
+  const unpaid = totalFee - paid;
+
+  document.getElementById('financeSummary').innerHTML = `
+    <div class="finance-card"><div class="amount" style="color:var(--c-text)">${rows.length}</div><div class="label">รายการทั้งหมด</div></div>
+    <div class="finance-card"><div class="amount" style="color:var(--c-success)">฿${totalFee.toLocaleString()}</div><div class="label">ค่าสอนรวม</div></div>
+    <div class="finance-card"><div class="amount" style="color:var(--c-primary)">฿${paid.toLocaleString()}</div><div class="label">จ่ายแล้ว</div></div>
+    <div class="finance-card"><div class="amount" style="color:var(--c-danger)">฿${unpaid.toLocaleString()}</div><div class="label">ค้างจ่าย</div></div>`;
+
+  document.getElementById('financeTable').innerHTML = `
+    <div class="table-wrap"><table><thead><tr>
+      <th>วันที่</th><th>เด็ก</th><th>คอร์ส</th><th>ผู้ฝึกสอน</th><th>ค่าสอน</th>
+      <th>สถานะการสอน</th><th>สถานะเงิน</th>
+      ${APP.role==='admin'?'<th>Actions</th>':''}
+    </tr></thead><tbody>
+    ${rows.map(r=>`<tr>
+      <td>${r.date||'-'}</td><td>${r.childName||'-'}</td><td>${r.courseName||'-'}</td>
+      <td>${r.trainerName||'-'}</td><td>฿${(r.fee||0).toLocaleString()}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${statusLabel(r.status)}</span></td>
+      <td><span class="badge ${r.paymentStatus==='paid'?'badge-success':'badge-danger'}">${r.paymentStatus==='paid'?'✅ จ่ายแล้ว':'⏳ ค้างจ่าย'}</span></td>
+      ${APP.role==='admin'?`<td><button class="btn-secondary btn-sm" onclick="openPaymentModal('${r.id}','${r.paymentId||''}','${r.fee||0}')">💳 อัปเดต</button></td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+async function openPaymentModal(sessionId, paymentId, fee) {
+  openModal(`
+    <div class="modal-title">💳 อัปเดตการชำระเงิน</div>
+    <div class="form-group"><label>ค่าตอบแทน (฿)</label><input type="number" id="pmAmt" value="${fee}"></div>
+    <div class="form-group"><label>สถานะ</label>
+      <select id="pmStatus"><option value="unpaid">ค้างจ่าย</option><option value="paid">จ่ายแล้ว</option></select></div>
+    <div class="form-group"><label>วิธีชำระ</label>
+      <select id="pmMethod"><option value="cash">เงินสด</option><option value="transfer">โอนเงิน</option><option value="cheque">เช็ค</option></select></div>
+    <div class="form-group"><label>หลักฐานการจ่าย (URL/หมายเหตุ)</label><input type="text" id="pmProof"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitPayment('${sessionId}')">บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitPayment(sessionId) {
+  const payload = {
+    sessionId,
+    amount: document.getElementById('pmAmt').value,
+    status: document.getElementById('pmStatus').value,
+    method: document.getElementById('pmMethod').value,
+    proof: document.getElementById('pmProof').value,
+    paidAt: new Date().toISOString().split('T')[0],
+  };
+  await api('updatePayment', payload);
+  toast('อัปเดตการชำระเงินแล้ว');
+  closeModal();
+  loadFinance();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PEOPLE (Parents & Children)
+// ══════════════════════════════════════════════════════════════
+async function renderPeople() {
+  let [parents, children] = await Promise.all([
+    api('getParents', {}), api('getChildren', {})
+  ]);
+  parents = arr(parents); children = arr(children);
+  const el = document.getElementById('pageContent');
+
+  // คำนวณอายุจากวันเกิด
+  function calcAge(dob) {
+    if (!dob) return '';
+    const d = new Date(dob), now = new Date();
+    let y = now.getFullYear() - d.getFullYear();
+    let m = now.getMonth() - d.getMonth();
+    if (m < 0) { y--; m += 12; }
+    return y > 0 ? `${y} ปี ${m} เดือน` : `${m} เดือน`;
+  }
+
+  // สร้าง card ผู้ปกครอง
+  function parentCard(p) {
+    const initials = (p.nickname || p.name || '?').charAt(0).toUpperCase();
+    const photoId  = `pp_${p.id}`;
+    return `
+      <div class="people-card" onclick="showParentDetail('${p.id}')" style="cursor:pointer">
+        <div class="people-card-header people-card-header--parent">
+          <div class="people-avatar" id="${photoId}">
+            <span class="people-avatar-initials">${initials}</span>
+          </div>
+          <div class="people-card-title">
+            <div class="people-card-name">${p.name||'-'}</div>
+            ${p.nickname ? `<div class="people-card-name" style="color:rgba(255,255,255,0.75)">"${p.nickname}"</div>` : ''}
+          </div>
+        </div>
+        <div class="people-card-body">
+          ${p.phone    ? `<div class="people-info-row"><span class="people-info-icon">📞</span><span>${p.phone}${p.phoneAlt ? ` / ${p.phoneAlt}` : ''}</span></div>` : ''}
+          ${p.lineId   ? `<div class="people-info-row"><span class="people-info-icon">💬</span><span>Line: ${p.lineId}</span></div>` : ''}
+          ${p.email    ? `<div class="people-info-row"><span class="people-info-icon">✉️</span><span>${p.email}</span></div>` : ''}
+          ${p.receiptName && p.receiptName !== p.name
+            ? `<div class="people-info-row"><span class="people-info-icon">🧾</span><span>ใบเสร็จ: ${p.receiptName}${p.taxId ? ` · เลขภาษี: ${p.taxId}` : ''}</span></div>`
+            : p.taxId ? `<div class="people-info-row"><span class="people-info-icon">🧾</span><span>เลขภาษี: ${p.taxId}</span></div>` : ''}
+          ${p.address  ? `<div class="people-info-row"><span class="people-info-icon">📍</span><span>${p.address}</span></div>` : ''}
+          <div class="people-card-children">
+            ${children.filter(c => String(c.parentId) === String(p.id)).map(c =>
+              `<span class="people-child-chip">👦 ${c.nickname || c.name}</span>`
+            ).join('')}
+          </div>
+        </div>
+        <div class="people-card-footer">
+          ${APP.role==='admin' ? `
+            <button class="btn-secondary btn-sm" onclick="event.stopPropagation();openParentForm('${p.id}')">✏️ แก้ไข</button>
+          ` : ''}
+        </div>
+      </div>`;
+  }
+
+  // สร้าง card เด็ก
+  function childCard(c) {
+    const initials  = (c.nickname || c.name || '?').charAt(0).toUpperCase();
+    const photoId   = `cp_${c.id}`;
+    const parent    = parents.find(p => String(p.id) === String(c.parentId));
+    const hasAlert  = c.foodAllergy || c.drugAllergy || c.medicalConditions || c.physicalLimitation;
+    return `
+      <div class="people-card ${hasAlert ? 'people-card--alert' : ''}" onclick="showChildDetail('${c.id}')" style="cursor:pointer">
+        <div class="people-card-header people-card-header--child">
+          <div class="people-avatar" id="${photoId}">
+            <span class="people-avatar-initials">${initials}</span>
+          </div>
+          <div class="people-card-title">
+            <div class="people-card-name">${c.name||'-'}</div>
+            ${c.nickname ? `<div class="people-card-name" style="color:rgba(255,255,255,0.75)">"${c.nickname}"</div>` : ''}
+            <div class="people-card-sub" style="margin-top:4px">
+              ${c.gender==='M'?'👦 ชาย':'👧 หญิง'}
+              ${c.dob ? ` · ${calcAge(c.dob)}` : ''}
+            </div>
+          </div>
+          ${c.bloodType ? `<span class="people-blood-badge">${c.bloodType}</span>` : ''}
+        </div>
+        <div class="people-card-body">
+          ${c.weight || c.height ? `
+            <div class="people-info-row">
+              <span class="people-info-icon">📏</span>
+              <span>${c.weight ? c.weight+'kg' : '?'} / ${c.height ? c.height+'cm' : '?'}</span>
+            </div>` : ''}
+          ${c.school ? `<div class="people-info-row"><span class="people-info-icon">🏫</span><span>${c.school}</span></div>` : ''}
+          ${c.trainingGoal ? `<div class="people-info-row"><span class="people-info-icon">🎯</span><span>${c.trainingGoal}</span></div>` : ''}
+          ${hasAlert ? `<div class="people-alert-row">
+            ${c.foodAllergy       ? `<span class="people-alert-tag">⚠️ แพ้อาหาร: ${c.foodAllergy}</span>` : ''}
+            ${c.drugAllergy       ? `<span class="people-alert-tag people-alert-tag--drug">💊 แพ้ยา: ${c.drugAllergy}</span>` : ''}
+            ${c.medicalConditions ? `<span class="people-alert-tag people-alert-tag--med">🏥 ${c.medicalConditions}</span>` : ''}
+            ${c.physicalLimitation? `<span class="people-alert-tag people-alert-tag--limit">🚫 ${c.physicalLimitation}</span>` : ''}
+          </div>` : ''}
+          ${parent ? `
+            <div class="people-info-row" style="margin-top:6px;border-top:1px solid var(--c-border);padding-top:6px">
+              <span class="people-info-icon">👨‍👩‍👧</span>
+              <span>${parent.name}${c.parentRelationship ? ` (${c.parentRelationship})` : ''}${parent.phone ? ` · ${parent.phone}` : ''}</span>
+            </div>` : ''}
+          ${c.emergencyContact ? `
+            <div class="people-info-row">
+              <span class="people-info-icon">🆘</span>
+              <span>${c.emergencyContact}${c.emergencyRelation ? ` (${c.emergencyRelation})` : ''} ${c.emergencyPhone || ''}</span>
+            </div>` : ''}
+          ${c.notes ? `<div class="people-info-row" style="color:var(--c-muted);font-size:0.8rem"><span class="people-info-icon">📝</span><span>${c.notes}</span></div>` : ''}
+        </div>
+        <div class="people-card-footer">
+          ${APP.role==='admin' ? `
+            <button class="btn-secondary btn-sm" onclick="event.stopPropagation();openChildForm('${c.id}')">✏️ แก้ไข</button>
+          ` : ''}
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-heading">👥 ผู้ปกครอง & เด็ก</div>
+      ${APP.role==='admin' ? `<div class="flex gap-2">
+        <button class="btn-secondary" onclick="openParentForm()">+ ผู้ปกครอง</button>
+        <button class="btn-primary"   onclick="openAddChildWithParent()">+ เพิ่มเด็ก</button>
+      </div>` : ''}
+    </div>
+
+    <!-- Search bar -->
+    <div class="filter-bar" style="margin-bottom:16px">
+      <input type="text" id="peopleSearch" placeholder="🔍 ค้นหาชื่อ..."
+        oninput="filterPeopleCards()" style="min-width:200px">
+    </div>
+
+    <!-- Tab -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchPeopleTab(this,'tabParents')">
+        👥 ผู้ปกครอง (${parents.length})
+      </button>
+      <button class="tab-btn" onclick="switchPeopleTab(this,'tabChildren')">
+        👦 เด็ก (${children.length})
+      </button>
+    </div>
+
+    <!-- Parents grid -->
+    <div id="tabParents">
+      <div class="people-grid" id="parentsGrid">
+        ${parents.length ? parents.map(parentCard).join('') : '<p class="people-empty">ยังไม่มีข้อมูลผู้ปกครอง</p>'}
+      </div>
+    </div>
+
+    <!-- Children grid -->
+    <div id="tabChildren" class="hidden">
+      <div class="people-grid" id="childrenGrid">
+        ${children.length ? children.map(childCard).join('') : '<p class="people-empty">ยังไม่มีข้อมูลเด็ก</p>'}
+      </div>
+    </div>`;
+
+  // โหลดรูปโปรไฟล์หลัง render
+  _loadPeoplePhotos(parents, children);
+}
+
+// โหลดรูปโปรไฟล์แบบ async ทีละ card เพื่อไม่ให้ block UI
+// ── Popup รายละเอียดผู้ปกครอง ──────────────────────────────────
+async function showParentDetail(parentId) {
+  // เปิด modal ทันทีพร้อม skeleton loader — ไม่รอข้อมูล
+  openModal(skeletonHtml(4));
+
+  // โหลดพร้อมกันทุกอย่าง
+  const [parents, children, photos] = await Promise.all([
+    api('getParents', {}),
+    api('getChildren', {}),
+    api('getPhotos', { linkedId: parentId, category: 'parents' }),
+  ]);
+
+  const p = arr(parents).find(x => String(x.id) === String(parentId));
+  if (!p) { closeModal(); return; }
+
+  const myChildren  = arr(children).filter(c => String(c.parentId) === String(parentId));
+  const initials    = (p.nickname || p.name || '?').charAt(0).toUpperCase();
+  const cleanPhotos = arr(photos).filter(x => !x.deleted);
+  const photoHtml   = cleanPhotos.length
+    ? `<img src="${cleanPhotos[0].fileUrl}" alt="${p.name}"
+        style="width:100%;height:100%;object-fit:cover;border-radius:12px"
+        onerror="this.style.display='none'">`
+    : `<span class="people-avatar-initials" style="font-size:2.5rem">${initials}</span>`;
+
+  updateModal(`
+    <div class="detail-header detail-header--parent">
+      <div class="detail-avatar">${photoHtml}</div>
+      <div class="detail-title">
+        <div class="detail-name">${p.name || '-'}</div>
+        ${p.nickname ? `<div class="detail-nickname">"${p.nickname}"</div>` : ''}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">📞 ช่องทางติดต่อ</div>
+      ${p.phone    ? detailRow('โทรศัพท์หลัก', p.phone) : ''}
+      ${p.phoneAlt ? detailRow('โทรศัพท์สำรอง', p.phoneAlt) : ''}
+      ${p.lineId   ? detailRow('Line ID', p.lineId) : ''}
+      ${p.email    ? detailRow('อีเมล', p.email) : ''}
+      ${p.address  ? detailRow('ที่อยู่', p.address) : ''}
+    </div>
+
+    ${p.receiptName || p.taxId ? `
+    <div class="detail-section">
+      <div class="detail-section-title">🧾 ข้อมูลใบเสร็จ</div>
+      ${p.receiptName ? detailRow('ชื่อออกใบเสร็จ', p.receiptName) : ''}
+      ${p.taxId       ? detailRow('เลขผู้เสียภาษี', p.taxId) : ''}
+    </div>` : ''}
+
+    ${myChildren.length ? `
+    <div class="detail-section">
+      <div class="detail-section-title">👦 บุตรหลานในความดูแล (${myChildren.length} คน)</div>
+      ${myChildren.map(c => `
+        <div class="detail-child-row" onclick="event.stopPropagation();closeModal();setTimeout(()=>showChildDetail('${c.id}'),150)">
+          <div class="detail-child-avatar">${(c.nickname||c.name||'?').charAt(0)}</div>
+          <div>
+            <div style="font-weight:600">${c.name}</div>
+            <div style="font-size:0.8rem;color:var(--c-muted)">${c.nickname ? '"'+c.nickname+'" · ' : ''}${c.gender==='M'?'ชาย':'หญิง'}${c.dob?' · '+calcAgePopup(c.dob):''}</div>
+          </div>
+          <span style="margin-left:auto;color:var(--c-muted);font-size:0.8rem">›</span>
+        </div>`).join('')}
+    </div>` : ''}
+
+    ${APP.role === 'admin' ? `
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ปิด</button>
+      <button class="btn-primary" onclick="closeModal();setTimeout(()=>openParentForm('${p.id}'),150)">✏️ แก้ไขข้อมูล</button>
+    </div>` : `<div class="form-actions"><button class="btn-secondary" onclick="closeModal()">ปิด</button></div>`}
+  `);
+}
+
+// ── Popup รายละเอียดเด็ก ────────────────────────────────────────
+async function showChildDetail(childId) {
+  // เปิด modal ทันทีพร้อม skeleton loader — ไม่รอข้อมูล
+  openModal(skeletonHtml(5));
+
+  // โหลดพร้อมกันทุกอย่าง
+  const [children, parents, photos] = await Promise.all([
+    api('getChildren', {}),
+    api('getParents', {}),
+    api('getPhotos', { linkedId: childId, category: 'children' }),
+  ]);
+
+  const c = arr(children).find(x => String(x.id) === String(childId));
+  if (!c) { closeModal(); return; }
+
+  const parent      = arr(parents).find(p => String(p.id) === String(c.parentId));
+  const initials    = (c.nickname || c.name || '?').charAt(0).toUpperCase();
+  const hasAlert    = c.foodAllergy || c.drugAllergy || c.medicalConditions || c.physicalLimitation;
+  const cleanPhotos = arr(photos).filter(x => !x.deleted);
+  const photoHtml   = cleanPhotos.length
+    ? `<img src="${cleanPhotos[0].fileUrl}" alt="${c.name}"
+        style="width:100%;height:100%;object-fit:cover;border-radius:12px"
+        onerror="this.style.display='none'">`
+    : `<span class="people-avatar-initials" style="font-size:2.5rem">${initials}</span>`;
+
+  updateModal(`
+    <div class="detail-header detail-header--child">
+      <div class="detail-avatar">${photoHtml}</div>
+      <div class="detail-title">
+        <div class="detail-name">${c.name || '-'}</div>
+        ${c.nickname ? `<div class="detail-nickname">"${c.nickname}"</div>` : ''}
+        ${c.bloodType ? `<span class="people-blood-badge" style="position:static;margin-top:6px;display:inline-block">${c.bloodType}</span>` : ''}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">👤 ข้อมูลทั่วไป</div>
+      ${detailRow('เพศ', c.gender==='M' ? '👦 ชาย' : '👧 หญิง')}
+      ${c.dob      ? detailRow('วันเกิด', c.dob + ' · อายุ ' + calcAgePopup(c.dob)) : ''}
+      ${c.school   ? detailRow('โรงเรียน', '🏫 ' + c.school) : ''}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">📏 ข้อมูลร่างกาย</div>
+      ${c.weight   ? detailRow('น้ำหนัก', c.weight + ' กก.') : ''}
+      ${c.height   ? detailRow('ส่วนสูง', c.height + ' ซม.') : ''}
+    </div>
+
+    ${hasAlert ? `
+    <div class="detail-section detail-section--alert">
+      <div class="detail-section-title">⚠️ ข้อมูลทางการแพทย์</div>
+      ${c.bloodType         ? detailRow('กรุ๊ปเลือด', c.bloodType) : ''}
+      ${c.medicalConditions ? detailRow('โรคประจำตัว', c.medicalConditions) : ''}
+      ${c.foodAllergy       ? detailRow('แพ้อาหาร', '⚠️ ' + c.foodAllergy) : ''}
+      ${c.drugAllergy       ? detailRow('แพ้ยา', '💊 ' + c.drugAllergy) : ''}
+      ${c.medications       ? detailRow('ยาที่ใช้ประจำ', c.medications) : ''}
+      ${c.physicalLimitation? detailRow('ข้อจำกัดทางร่างกาย', '🚫 ' + c.physicalLimitation) : ''}
+    </div>` : (c.bloodType || c.medications ? `
+    <div class="detail-section">
+      <div class="detail-section-title">🏥 ข้อมูลทางการแพทย์</div>
+      ${c.bloodType   ? detailRow('กรุ๊ปเลือด', c.bloodType) : ''}
+      ${c.medications ? detailRow('ยาที่ใช้ประจำ', c.medications) : ''}
+    </div>` : '')}
+
+    ${c.trainingGoal ? `
+    <div class="detail-section">
+      <div class="detail-section-title">🎯 เป้าหมายการฝึก</div>
+      ${detailRow('เป้าหมาย', c.trainingGoal)}
+    </div>` : ''}
+
+    ${c.emergencyContact || c.doctorName ? `
+    <div class="detail-section">
+      <div class="detail-section-title">🆘 ติดต่อฉุกเฉิน</div>
+      ${c.emergencyContact ? detailRow(c.emergencyRelation || 'ผู้ติดต่อ', c.emergencyContact + (c.emergencyPhone ? ' · ' + c.emergencyPhone : '')) : ''}
+      ${c.doctorName       ? detailRow('แพทย์/โรงพยาบาล', c.doctorName + (c.doctorPhone ? ' · ' + c.doctorPhone : '')) : ''}
+    </div>` : ''}
+
+    ${parent ? `
+    <div class="detail-section">
+      <div class="detail-section-title">👨‍👩‍👧 ผู้ปกครอง</div>
+      <div class="detail-child-row" onclick="event.stopPropagation();closeModal();setTimeout(()=>showParentDetail('${parent.id}'),150)">
+        <div class="detail-child-avatar">${(parent.nickname||parent.name||'?').charAt(0)}</div>
+        <div>
+          <div style="font-weight:600">${parent.name}${c.parentRelationship ? ' ('+c.parentRelationship+')' : ''}</div>
+          <div style="font-size:0.8rem;color:var(--c-muted)">${parent.phone || ''}${parent.lineId ? ' · Line: '+parent.lineId : ''}</div>
+        </div>
+        <span style="margin-left:auto;color:var(--c-muted);font-size:0.8rem">›</span>
+      </div>
+    </div>` : ''}
+
+    ${c.notes ? `
+    <div class="detail-section">
+      <div class="detail-section-title">📝 หมายเหตุ</div>
+      <p style="color:var(--c-muted);font-size:0.88rem;line-height:1.6">${c.notes}</p>
+    </div>` : ''}
+
+    ${APP.role === 'admin' ? `
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ปิด</button>
+      <button class="btn-primary" onclick="closeModal();setTimeout(()=>openChildForm('${c.id}'),150)">✏️ แก้ไขข้อมูล</button>
+    </div>` : `<div class="form-actions"><button class="btn-secondary" onclick="closeModal()">ปิด</button></div>`}
+  `);
+}
+
+// ── helpers สำหรับ popup ───────────────────────────────────────
+
+// สร้าง skeleton loader สำหรับ popup — แสดงทันทีก่อนข้อมูลโหลด
+function skeletonHtml(rows = 4) {
+  const lines = Array.from({length: rows}, () =>
+    `<div class="skeleton-line"></div>`
+  ).join('');
+  return `
+    <div class="detail-skeleton">
+      <div class="detail-skeleton-header">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line skeleton-line--lg"></div>
+          <div class="skeleton-line skeleton-line--md"></div>
+        </div>
+      </div>
+      <div class="skeleton-body">${lines}</div>
+    </div>`;
+}
+
+function detailRow(label, value) {
+  return `<div class="detail-row">
+    <span class="detail-label">${label}</span>
+    <span class="detail-value">${value}</span>
+  </div>`;
+}
+
+function calcAgePopup(dob) {
+  if (!dob) return '';
+  const d = new Date(dob), now = new Date();
+  let y = now.getFullYear() - d.getFullYear();
+  let m = now.getMonth() - d.getMonth();
+  if (m < 0) { y--; m += 12; }
+  return y > 0 ? `${y} ปี ${m} เดือน` : `${m} เดือน`;
+}
+
+
+async function _loadPeoplePhotos(parents, children) {
+  // โหลดรูป Parent
+  for (const p of parents) {
+    const photos = arr(await api('getPhotos', { linkedId: p.id, category: 'parents' }))
+      .filter(x => !x.deleted);
+    if (photos.length) {
+      const el = document.getElementById(`pp_${p.id}`);
+      if (el) el.innerHTML = `<img src="${photos[0].thumbUrl || photos[0].fileUrl}"
+        alt="${p.name}" onerror="this.style.display='none'">`;
+    }
+  }
+  // โหลดรูปเด็ก
+  for (const c of children) {
+    const photos = arr(await api('getPhotos', { linkedId: c.id, category: 'children' }))
+      .filter(x => !x.deleted);
+    if (photos.length) {
+      const el = document.getElementById(`cp_${c.id}`);
+      if (el) el.innerHTML = `<img src="${photos[0].thumbUrl || photos[0].fileUrl}"
+        alt="${c.name}" onerror="this.style.display='none'">`;
+    }
+  }
+}
+
+function switchPeopleTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tabParents','tabChildren'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', id !== tabId);
+  });
+  // ล้าง search เมื่อสลับ tab
+  const s = document.getElementById('peopleSearch');
+  if (s) s.value = '';
+}
+
+function filterPeopleCards() {
+  const q = (document.getElementById('peopleSearch')?.value || '').toLowerCase();
+  // หา grid ที่แสดงอยู่
+  const activeTab = document.getElementById('tabParents')?.classList.contains('hidden')
+    ? 'childrenGrid' : 'parentsGrid';
+  const grid = document.getElementById(activeTab);
+  if (!grid) return;
+  grid.querySelectorAll('.people-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+
+async function openParentForm(id = null) {
+  let p = {};
+  if (id) { const rows = arr(await api('getParents', {})); p = rows.find(r => r.id === id) || {}; }
+  openModal(`
+    <div class="modal-title">${id?'✏️ แก้ไขผู้ปกครอง':'+ เพิ่มผู้ปกครอง'}</div>
+    <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="pName" value="${p.name||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>โทรศัพท์</label><input type="tel" id="pPhone" value="${p.phone||''}"></div>
+      <div class="form-group"><label>อีเมล</label><input type="email" id="pEmail" value="${p.email||''}"></div>
+    </div>
+    <div class="form-group"><label>ที่อยู่</label><textarea id="pAddr">${p.address||''}</textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitParent('${id||''}')">บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitParent(id) {
+  const name = (document.getElementById('pName')?.value || '').trim();
+  if (!name) { toast('กรุณากรอกชื่อผู้ปกครอง', 'error'); return; }
+
+  const g = (elId) => (document.getElementById(elId)?.value || '').trim();
+  const payload = {
+    name,
+    nickname:     g('pNickname'),
+    phone:        g('pPhone'),
+    phoneAlt:     g('pPhoneAlt'),
+    email:        g('pEmail'),
+    lineId:       g('pLineId'),
+    address:      g('pAddr'),
+    receiptName:  g('pReceiptName'),
+    taxId:        g('pTaxId'),
+  };
+  if (id) payload.id = id;
+
+  const r = await apiRaw(id ? 'updateParent' : 'createParent', payload);
+  if (!r || r.error) { toast('เกิดข้อผิดพลาด: ' + (r?.error || 'ไม่ทราบสาเหตุ'), 'error'); return; }
+  toast(id ? 'อัปเดตข้อมูลผู้ปกครองแล้ว ✓' : 'เพิ่มผู้ปกครองแล้ว ✓');
+  closeModal();
+  renderPeople();
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMBINED FORM — เพิ่มผู้ปกครอง + เด็กในหน้าเดียว (Option A)
+// ══════════════════════════════════════════════════════════════
+async function openAddChildWithParent() {
+  // โหลด Parent ที่มีอยู่แล้วเพื่อให้เลือกหรือเพิ่มใหม่
+  const existingParents = arr(await api('getParents', {}));
+
+  const parentOpts = existingParents.map(p =>
+    `<option value="${p.id}">${p.name}${p.nickname ? ' ('+p.nickname+')' : ''} — ${p.phone||''}</option>`
+  ).join('');
+
+
+  const bloodOpts = ['','A','B','AB','O','A+','A-','B+','B-','AB+','AB-','O+','O-']
+    .map(bg => `<option value="${bg}">${bg||'- ไม่ทราบ -'}</option>`).join('');
+
+  openModal(`
+    <div class="modal-title">+ เพิ่มเด็กและผู้ปกครอง</div>
+
+    <!-- ── ส่วนที่ 1: ผู้ปกครอง ── -->
+    <div style="background:rgba(108,99,255,0.06);border:1px solid rgba(108,99,255,0.2);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+      <p style="font-size:0.85rem;font-weight:700;color:var(--c-primary);margin-bottom:12px">👥 ส่วนที่ 1 — ผู้ปกครอง</p>
+
+      <!-- เลือก Parent ที่มีอยู่แล้ว หรือเพิ่มใหม่ -->
+      <div class="form-group">
+        <label>ผู้ปกครอง</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="cpExistingParent" onchange="toggleNewParentForm(this.value)" style="flex:1">
+            <option value="new">➕ เพิ่มผู้ปกครองใหม่</option>
+            ${parentOpts}
+          </select>
+        </div>
+        <div style="font-size:0.78rem;color:var(--c-muted);margin-top:4px">เลือกจากรายการ หรือเลือก "เพิ่มผู้ปกครองใหม่"</div>
+      </div>
+
+      <!-- Form ผู้ปกครองใหม่ (แสดงเมื่อเลือก "เพิ่มใหม่") -->
+      <div id="newParentForm">
+        <div class="form-row">
+          <div class="form-group"><label>ชื่อ-นามสกุล *</label>
+            <input type="text" id="cpName" placeholder="ชื่อจริง นามสกุล"></div>
+          <div class="form-group"><label>ชื่อเล่น</label>
+            <input type="text" id="cpNickname" placeholder="ชื่อเล่น"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>โทรศัพท์หลัก *</label>
+            <input type="tel" id="cpPhone" placeholder="08x-xxx-xxxx"></div>
+          <div class="form-group"><label>โทรศัพท์สำรอง</label>
+            <input type="tel" id="cpPhoneAlt" placeholder="08x-xxx-xxxx"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>อีเมล</label>
+            <input type="email" id="cpEmail" placeholder="email@example.com"></div>
+          <div class="form-group"><label>Line ID</label>
+            <input type="text" id="cpLineId" placeholder="Line ID"></div>
+        </div>
+        <div class="form-group"><label>ที่อยู่</label>
+          <textarea id="cpAddress" rows="2" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>ชื่อออกใบเสร็จ</label>
+            <input type="text" id="cpReceiptName" placeholder="ถ้าต่างจากชื่อข้างต้น"></div>
+          <div class="form-group"><label>เลขผู้เสียภาษี</label>
+            <input type="text" id="cpTaxId" placeholder="13 หลัก (ถ้ามี)" maxlength="13"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ส่วนที่ 2: ข้อมูลเด็ก ── -->
+    <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius-sm);padding:14px">
+      <p style="font-size:0.85rem;font-weight:700;color:var(--c-success);margin-bottom:12px">👦 ส่วนที่ 2 — ข้อมูลเด็ก</p>
+
+      <div class="form-row">
+        <div class="form-group"><label>ชื่อ-นามสกุล *</label>
+          <input type="text" id="ccName" placeholder="ชื่อจริง นามสกุล"></div>
+        <div class="form-group"><label>ชื่อเล่น</label>
+          <input type="text" id="ccNick" placeholder="ชื่อเล่น"></div>
+      </div>
+      <div class="form-group"><label>ความสัมพันธ์ของผู้ปกครองกับเด็กคนนี้</label>
+        <select id="ccParentRelationship">
+          <option value="">-- ระบุความสัมพันธ์ --</option>
+          ${['พ่อ','แม่','ปู่','ย่า','ตา','ยาย','ลุง','ป้า','น้า','อา','ผู้ปกครองตามกฎหมาย','อื่นๆ']
+            .map(r => `<option value="${r}">${r}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>วันเกิด</label>
+          <input type="date" id="ccDob"></div>
+        <div class="form-group"><label>เพศ</label>
+          <select id="ccGender">
+            <option value="M">ชาย</option>
+            <option value="F">หญิง</option>
+          </select></div>
+      </div>
+
+      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--c-muted);margin:12px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--c-border)">📏 ข้อมูลร่างกาย</p>
+      <div class="form-row">
+        <div class="form-group"><label>น้ำหนัก (กก.)</label>
+          <input type="number" id="ccWeight" step="0.1" min="0" placeholder="เช่น 18.5"></div>
+        <div class="form-group"><label>ส่วนสูง (ซม.)</label>
+          <input type="number" id="ccHeight" step="0.1" min="0" placeholder="เช่น 110.0"></div>
+      </div>
+
+      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--c-muted);margin:12px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--c-border)">🏥 ข้อมูลทางการแพทย์</p>
+      <div class="form-row">
+        <div class="form-group"><label>กรุ๊ปเลือด</label>
+          <select id="ccBloodType">${bloodOpts}</select></div>
+        <div class="form-group"><label>โรคประจำตัว</label>
+          <input type="text" id="ccMedicalConditions" placeholder="เช่น หืดหอบ, ภูมิแพ้"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>⚠️ แพ้อาหาร</label>
+          <input type="text" id="ccFoodAllergy" placeholder="เช่น นมวัว, ถั่วลิสง"></div>
+        <div class="form-group"><label>💊 แพ้ยา</label>
+          <input type="text" id="ccDrugAllergy" placeholder="เช่น เพนิซิลิน"></div>
+      </div>
+      <div class="form-group"><label>ยาที่ใช้ประจำ</label>
+        <input type="text" id="ccMedications" placeholder="ชื่อยา / วิธีใช้"></div>
+
+      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--c-muted);margin:12px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--c-border)">🆘 ติดต่อฉุกเฉิน</p>
+      <div class="form-row">
+        <div class="form-group"><label>ชื่อผู้ติดต่อฉุกเฉิน</label>
+          <input type="text" id="ccEmergencyContact" placeholder="ชื่อ-นามสกุล"></div>
+        <div class="form-group"><label>ความสัมพันธ์</label>
+          <input type="text" id="ccEmergencyRelation" placeholder="เช่น พ่อ, แม่, ย่า"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>เบอร์โทรฉุกเฉิน</label>
+          <input type="tel" id="ccEmergencyPhone" placeholder="08x-xxx-xxxx"></div>
+        <div class="form-group"><label>ชื่อแพทย์ / โรงพยาบาล</label>
+          <input type="text" id="ccDoctorName" placeholder="นพ. ... / รพ. ..."></div>
+      </div>
+
+      <p style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--c-muted);margin:12px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--c-border)">🎯 พัฒนาการและการฝึก</p>
+      <div class="form-group"><label>โรงเรียน</label>
+        <input type="text" id="ccSchool" placeholder="ชื่อโรงเรียน"></div>
+      <div class="form-group"><label>เป้าหมายการฝึก</label>
+        <input type="text" id="ccTrainingGoal" placeholder="เช่น เพิ่มความมั่นใจ, ลดน้ำหนัก"></div>
+      <div class="form-group"><label>⚠️ ข้อจำกัดทางร่างกาย</label>
+        <input type="text" id="ccPhysicalLimitation" placeholder="เช่น ขาซ้ายเคยหัก อย่าให้วิ่งนาน"></div>
+      <div class="form-group"><label>หมายเหตุ</label>
+        <textarea id="ccNotes" rows="2" placeholder="ข้อมูลเพิ่มเติมที่ Trainer ควรทราบ..."></textarea></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitCombinedForm()">💾 บันทึกทั้งหมด</button>
+    </div>
+  `);
+}
+
+// toggle แสดง/ซ่อน form ผู้ปกครองใหม่
+function toggleNewParentForm(val) {
+  const form = document.getElementById('newParentForm');
+  if (form) form.style.display = val === 'new' ? 'block' : 'none';
+}
+
+// submit form รวม — สร้าง Parent ก่อน แล้วค่อยสร้างเด็ก
+async function submitCombinedForm() {
+  const childName = (document.getElementById('ccName')?.value || '').trim();
+  if (!childName) { toast('กรุณากรอกชื่อเด็ก', 'error'); return; }
+
+  const g = (elId) => (document.getElementById(elId)?.value || '').trim();
+  const existingParentId = g('cpExistingParent');
+
+  let parentId = '';
+
+  if (existingParentId === 'new') {
+    // สร้าง Parent ใหม่
+    const parentName = g('cpName');
+    if (!parentName) { toast('กรุณากรอกชื่อผู้ปกครอง', 'error'); return; }
+
+    const parentPayload = {
+      name:         parentName,
+      nickname:     g('cpNickname'),
+      phone:        g('cpPhone'),
+      phoneAlt:     g('cpPhoneAlt'),
+      email:        g('cpEmail'),
+      lineId:       g('cpLineId'),
+      address:      g('cpAddress'),
+      receiptName:  g('cpReceiptName'),
+      taxId:        g('cpTaxId'),
+    };
+    const parentResult = await apiRaw('createParent', parentPayload);
+    if (!parentResult || parentResult.error) {
+      toast('สร้างผู้ปกครองไม่สำเร็จ: ' + (parentResult?.error || 'ไม่ทราบสาเหตุ'), 'error');
+      return;
+    }
+    parentId = parentResult.id;
+  } else {
+    // ใช้ Parent ที่มีอยู่แล้ว
+    parentId = existingParentId;
+  }
+
+  // สร้างเด็ก
+  const childPayload = {
+    parentId,
+    parentRelationship:  g('ccParentRelationship'),
+    name:               childName,
+    nickname:           g('ccNick'),
+    dob:                g('ccDob'),
+    gender:             g('ccGender'),
+    weight:             g('ccWeight'),
+    height:             g('ccHeight'),
+    bloodType:          g('ccBloodType'),
+    medicalConditions:  g('ccMedicalConditions'),
+    foodAllergy:        g('ccFoodAllergy'),
+    drugAllergy:        g('ccDrugAllergy'),
+    medications:        g('ccMedications'),
+    emergencyContact:   g('ccEmergencyContact'),
+    emergencyPhone:     g('ccEmergencyPhone'),
+    emergencyRelation:  g('ccEmergencyRelation'),
+    doctorName:         g('ccDoctorName'),
+    doctorPhone:        '',
+    trainingGoal:       g('ccTrainingGoal'),
+    physicalLimitation: g('ccPhysicalLimitation'),
+    school:             g('ccSchool'),
+    notes:              g('ccNotes'),
+  };
+
+  const childResult = await apiRaw('createChild', childPayload);
+  if (!childResult || childResult.error) {
+    toast('สร้างข้อมูลเด็กไม่สำเร็จ: ' + (childResult?.error || 'ไม่ทราบสาเหตุ'), 'error');
+    return;
+  }
+
+  toast('บันทึกข้อมูลผู้ปกครองและเด็กสำเร็จ ✓');
+  closeModal();
+  renderPeople();
+}
+
+
+
+async function openChildForm(id = null) {
+  const parents = arr(await api('getParents', {}));
+  if (!parents.length) {
+    toast('กรุณาเพิ่มข้อมูลผู้ปกครองก่อน', 'error');
+    return;
+  }
+  let c = {};
+  if (id) { const rows = arr(await api('getChildren', {})); c = rows.find(r => r.id === id) || {}; }
+
+  // สร้าง parent options โดยเปรียบเทียบแบบ string เพื่อป้องกัน type mismatch
+  const parentOpts = parents.map(p => {
+    const selected = String(p.id) === String(c.parentId) ? ' selected' : '';
+    return `<option value="${p.id}"${selected}>${p.name}</option>`;
+  }).join('');
+
+  openModal(`
+    <div class="modal-title">${id?'✏️ แก้ไขข้อมูลเด็ก':'+ เพิ่มเด็ก'}</div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">👤 ข้อมูลทั่วไป</p>
+    <div class="form-group"><label>ผู้ปกครอง *</label>
+      <select id="cParent"><option value="">-- เลือกผู้ปกครอง --</option>${parentOpts}</select>
+    </div>
+
+    <div class="form-group"><label>ความสัมพันธ์ของผู้ปกครองกับเด็กคนนี้</label>
+      <select id="cParentRelationship">
+        ${['','พ่อ','แม่','ปู่','ย่า','ตา','ยาย','ลุง','ป้า','น้า','อา','ผู้ปกครองตามกฎหมาย','อื่นๆ']
+          .map(r => `<option value="${r}"${c.parentRelationship===r?' selected':''}>${r||'-- ระบุความสัมพันธ์ --'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อ-นามสกุล *</label><input type="text" id="cName" value="${c.name||''}"></div>
+      <div class="form-group"><label>ชื่อเล่น</label><input type="text" id="cNick" value="${c.nickname||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>วันเกิด</label><input type="date" id="cDob" value="${c.dob||''}"></div>
+      <div class="form-group"><label>เพศ</label>
+        <select id="cGender">
+          <option value="M"${c.gender==='M'?' selected':''}>ชาย</option>
+          <option value="F"${c.gender==='F'?' selected':''}>หญิง</option>
+        </select>
+      </div>
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">📏 ข้อมูลร่างกาย</p>
+    <div class="form-row">
+      <div class="form-group"><label>น้ำหนัก (กก.)</label><input type="number" id="cWeight" value="${c.weight||''}" step="0.1" min="0" placeholder="เช่น 18.5"></div>
+      <div class="form-group"><label>ส่วนสูง (ซม.)</label><input type="number" id="cHeight" value="${c.height||''}" step="0.1" min="0" placeholder="เช่น 110.0"></div>
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🏥 ข้อมูลทางการแพทย์</p>
+    <div class="form-row">
+      <div class="form-group"><label>กรุ๊ปเลือด</label>
+        <select id="cBloodType">
+          ${['','A','B','AB','O','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg=>`<option value="${bg}"${c.bloodType===bg?' selected':''}>${bg||'- ไม่ทราบ -'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>โรคประจำตัว / ประวัติการรักษา</label>
+        <input type="text" id="cMedicalConditions" value="${c.medicalConditions||''}" placeholder="เช่น หืดหอบ, ภูมิแพ้">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>⚠️ แพ้อาหาร</label>
+        <input type="text" id="cFoodAllergy" value="${c.foodAllergy||''}" placeholder="เช่น นมวัว, ถั่วลิสง">
+      </div>
+      <div class="form-group"><label>💊 แพ้ยา</label>
+        <input type="text" id="cDrugAllergy" value="${c.drugAllergy||''}" placeholder="เช่น เพนิซิลิน, แอสไพริน">
+      </div>
+    </div>
+    <div class="form-group"><label>ยาที่ใช้ประจำ</label>
+      <input type="text" id="cMedications" value="${c.medications||''}" placeholder="ชื่อยา / วิธีใช้">
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🆘 ติดต่อฉุกเฉิน</p>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อผู้ติดต่อฉุกเฉิน</label>
+        <input type="text" id="cEmergencyContact" value="${c.emergencyContact||''}" placeholder="ชื่อ-นามสกุล">
+      </div>
+      <div class="form-group"><label>ความสัมพันธ์</label>
+        <input type="text" id="cEmergencyRelation" value="${c.emergencyRelation||''}" placeholder="เช่น พ่อ, แม่, ย่า">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>เบอร์โทรฉุกเฉิน</label>
+        <input type="tel" id="cEmergencyPhone" value="${c.emergencyPhone||''}" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="form-group"><label>ชื่อแพทย์ / โรงพยาบาล</label>
+        <input type="text" id="cDoctorName" value="${c.doctorName||''}" placeholder="นพ. ... / รพ. ...">
+      </div>
+    </div>
+    <div class="form-group"><label>เบอร์แพทย์ / โรงพยาบาล</label>
+      <input type="tel" id="cDoctorPhone" value="${c.doctorPhone||''}" placeholder="0x-xxx-xxxx">
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🎯 พัฒนาการและการฝึก</p>
+    <div class="form-group"><label>โรงเรียนที่เรียน</label>
+      <input type="text" id="cSchool" value="${c.school||''}" placeholder="ชื่อโรงเรียน">
+    </div>
+    <div class="form-group"><label>เป้าหมายที่ต้องการพัฒนา</label>
+      <input type="text" id="cTrainingGoal" value="${c.trainingGoal||''}" placeholder="เช่น เพิ่มความมั่นใจ, ลดน้ำหนัก, เสริมทักษะการเล่นกีฬา">
+    </div>
+    <div class="form-group"><label>⚠️ ข้อจำกัดทางร่างกาย</label>
+      <input type="text" id="cPhysicalLimitation" value="${c.physicalLimitation||''}" placeholder="เช่น ขาซ้ายเคยหัก อย่าให้วิ่งนาน, ปวดหลังเรื้อรัง">
+    </div>
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">📝 หมายเหตุ</p>
+    <div class="form-group">
+      <textarea id="cNotes" rows="3" placeholder="ข้อมูลเพิ่มเติมที่ Trainer ควรทราบ...">${c.notes||''}</textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitChild('${id||''}')">💾 บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitChild(id) {
+  const name     = (document.getElementById('cName')?.value || '').trim();
+  const parentId = document.getElementById('cParent')?.value || '';
+  if (!name)     { toast('กรุณากรอกชื่อเด็ก', 'error'); return; }
+  if (!parentId) { toast('กรุณาเลือกผู้ปกครอง', 'error'); return; }
+
+  // ฟังก์ชัน helper อ่านค่า input อย่างปลอดภัย
+  const g = (elId) => (document.getElementById(elId)?.value || '').trim();
+
+  const payload = {
+    name, parentId,
+    parentRelationship:  g('cParentRelationship'),
+    nickname:           g('cNick'),
+    dob:                g('cDob'),
+    gender:             g('cGender'),
+    // ข้อมูลร่างกาย
+    weight:             g('cWeight'),
+    height:             g('cHeight'),
+    // ข้อมูลทางการแพทย์
+    bloodType:          g('cBloodType'),
+    medicalConditions:  g('cMedicalConditions'),
+    foodAllergy:        g('cFoodAllergy'),
+    drugAllergy:        g('cDrugAllergy'),
+    medications:        g('cMedications'),
+    // ติดต่อฉุกเฉิน
+    emergencyContact:   g('cEmergencyContact'),
+    emergencyPhone:     g('cEmergencyPhone'),
+    emergencyRelation:  g('cEmergencyRelation'),
+    doctorName:         g('cDoctorName'),
+    doctorPhone:        g('cDoctorPhone'),
+    // พัฒนาการและการฝึก
+    trainingGoal:       g('cTrainingGoal'),
+    physicalLimitation: g('cPhysicalLimitation'),
+    // การเข้าร่วม
+    school:             g('cSchool'),
+    notes:              g('cNotes'),
+  };
+  if (id) payload.id = id;
+
+  const r = await apiRaw(id ? 'updateChild' : 'createChild', payload);
+  if (!r || r.error) { toast('เกิดข้อผิดพลาด: ' + (r?.error || 'ไม่ทราบสาเหตุ'), 'error'); return; }
+  toast(id ? 'อัปเดตข้อมูลเด็กแล้ว ✓' : 'เพิ่มข้อมูลเด็กแล้ว ✓');
+  closeModal();
+  renderPeople();
+}
+
+// ══════════════════════════════════════════════════════════════
+// LEARNING REPORT
+// ══════════════════════════════════════════════════════════════
+async function renderReport() {
+  let enrollments = arr(await api('getEnrollments', {}));
+  let [children, courses] = await Promise.all([api('getChildren', {}), api('getCourses', {})]);
+  children = arr(children); courses = arr(courses);
+  const el = document.getElementById('pageContent');
+
+  el.innerHTML = `
+    <div class="page-header"><div class="page-heading">📋 แบบสรุปการเรียน</div></div>
+    <div class="card">
+      <div class="form-group" style="max-width:400px"><label>เลือก Enrollment เพื่อดูรายงาน</label>
+        <select id="reportEnroll" onchange="loadReport(this.value)">
+          <option value="">-- เลือก --</option>
+          ${enrollments.map(e=>{
+            const child = children.find(c=>c.id===e.childId)||{};
+            const course = courses.find(c=>c.id===e.courseId)||{};
+            return `<option value="${e.id}">${child.name||''} — ${course.name||''}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="reportOutput"></div>`;
+}
+
+async function loadReport(enrollmentId) {
+  if (!enrollmentId) return;
+  const data = await api('getLearningReport', { enrollmentId });
+  const out = document.getElementById('reportOutput');
+
+  out.innerHTML = `
+    <div class="report-paper" id="reportPaper">
+      <div class="report-header">
+        <div class="report-logo-row">
+          <span style="font-size:2.5rem">⭐</span>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:#1a1d27">Little Stars Training Center</div>
+            <div style="color:#64748b;font-size:0.9rem">แบบสรุปผลการเรียน / Learning Progress Report</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin:16px 0"><span style="background:#6c63ff;color:#fff;padding:4px 14px;border-radius:20px;font-size:0.85rem">คอร์ส: ${data.course?.name||'-'}</span></div>
+
+      <div class="report-child-info">
+        <div><label style="font-size:0.78rem;color:#94a3b8">ชื่อเด็ก</label><strong>${data.child?.name||'-'}</strong></div>
+        <div><label style="font-size:0.78rem;color:#94a3b8">ชื่อเล่น</label><strong>${data.child?.nickname||'-'}</strong></div>
+        <div><label style="font-size:0.78rem;color:#94a3b8">วันเกิด</label><strong>${data.child?.dob||'-'}</strong></div>
+        <div><label style="font-size:0.78rem;color:#94a3b8">สอนแล้ว</label><strong style="color:#6c63ff">${data.completedSessions||0} / ${data.enrollment?.totalSessions||0} ครั้ง</strong></div>
+      </div>
+
+      <div class="report-section">
+        <h3>ประวัติการฝึกสอน</h3>
+        <table class="report-table" style="width:100%;border-collapse:collapse;font-size:0.88rem">
+          <thead><tr><th style="background:#6c63ff;color:#fff;padding:8px">ครั้ง</th><th style="background:#6c63ff;color:#fff;padding:8px">วันที่</th><th style="background:#6c63ff;color:#fff;padding:8px">ผู้สอน</th><th style="background:#6c63ff;color:#fff;padding:8px">บันทึก</th><th style="background:#6c63ff;color:#fff;padding:8px">คะแนน</th></tr></thead>
+          <tbody>
+          ${arr(data.detail).map(d=>`<tr style="border-bottom:1px solid #e2e8f0">
+            <td style="padding:8px;text-align:center">${d.sessionNo}</td>
+            <td style="padding:8px">${d.date||'-'}</td>
+            <td style="padding:8px">${d.trainerName||'-'}</td>
+            <td style="padding:8px;max-width:200px">${d.note||'-'}</td>
+            <td style="padding:8px;color:#f9a826">${d.rating?'★'.repeat(Number(d.rating)):'-'}</td>
+          </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:40px;display:flex;justify-content:space-between">
+        <div style="text-align:center"><div style="border-top:1px solid #1a1d27;width:160px;padding-top:6px;margin-top:32px;font-size:0.82rem;color:#64748b">ลายมือชื่อผู้ปกครอง</div></div>
+        <div style="text-align:center"><div style="border-top:1px solid #1a1d27;width:160px;padding-top:6px;margin-top:32px;font-size:0.82rem;color:#64748b">ลายมือชื่อผู้อำนวยการ</div></div>
+      </div>
+
+      <div style="text-align:center;margin-top:20px;color:#94a3b8;font-size:0.78rem">
+        พิมพ์วันที่: ${new Date().toLocaleDateString('th-TH')} &nbsp;|&nbsp; Little Stars Training Center
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-primary" onclick="printReport()">🖨 พิมพ์รายงาน</button>
+    </div>`;
+}
+
+function printReport() {
+  const content = document.getElementById('reportPaper').outerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Learning Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>body{font-family:'Sarabun',sans-serif;margin:0}@media print{body{margin:0}}</style>
+    </head><body>${content}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// ══════════════════════════════════════════════════════════════
+// RECEIPT
+// ══════════════════════════════════════════════════════════════
+async function renderReceipt() {
+  let enrollments = arr(await api('getEnrollments', {}));
+  let [children, courses] = await Promise.all([api('getChildren', {}), api('getCourses', {})]);
+  children = arr(children); courses = arr(courses);
+  const el = document.getElementById('pageContent');
+
+  el.innerHTML = `
+    <div class="page-header"><div class="page-heading">🧾 ใบเสร็จรับเงิน</div></div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="form-group" style="max-width:400px"><label>เลือก Enrollment เพื่อออกใบเสร็จ</label>
+        <select id="receiptEnroll" onchange="loadReceipt(this.value)">
+          <option value="">-- เลือก --</option>
+          ${enrollments.map(e=>{
+            const child = children.find(c=>c.id===e.childId)||{};
+            const course = courses.find(c=>c.id===e.courseId)||{};
+            return `<option value="${e.id}">${child.name||''} — ${course.name||''}</option>`;
+          }).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="receiptOutput"></div>`;
+}
+
+async function loadReceipt(enrollmentId) {
+  if (!enrollmentId) return;
+  const data = await api('getReceiptData', { enrollmentId });
+  const total = Number(data.course?.price||0);
+
+  document.getElementById('receiptOutput').innerHTML = `
+    <div class="receipt-paper" id="receiptDoc">
+      <div class="receipt-header">
+        <div class="receipt-logo">⭐</div>
+        <div class="receipt-title">Little Stars Training Center</div>
+        <div class="receipt-sub">ศูนย์ฝึกเด็กเล็ก | ใบเสร็จรับเงิน</div>
+      </div>
+
+      <div class="receipt-meta">
+        <div class="receipt-meta-item"><label>เลขที่ใบเสร็จ</label><span style="color:#6c63ff;font-family:monospace">${data.receiptNo}</span></div>
+        <div class="receipt-meta-item"><label>วันที่ออก</label><span>${data.date}</span></div>
+        <div class="receipt-meta-item"><label>ชื่อผู้ปกครอง</label><span>${data.parent?.name||'-'}</span></div>
+        <div class="receipt-meta-item"><label>โทรศัพท์</label><span>${data.parent?.phone||'-'}</span></div>
+      </div>
+
+      <div style="background:#f8fafc;border-radius:8px;padding:14px;margin:16px 0">
+        <div style="font-size:0.82rem;color:#94a3b8">นักเรียน / Student</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#1a1d27">${data.child?.name||'-'} <span style="font-size:0.9rem;color:#64748b">(${data.child?.nickname||''})</span></div>
+      </div>
+
+      <table class="receipt-table">
+        <thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>รวม</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>${data.course?.name||'-'}</strong><br><span style="font-size:0.82rem;color:#64748b">${data.course?.description||''}</span></td>
+            <td>${data.enrollment?.totalSessions||0} ครั้ง</td>
+            <td>฿${total > 0 && data.enrollment?.totalSessions > 0 ? Math.round(total/data.enrollment.totalSessions).toLocaleString() : '-'}</td>
+            <td>฿${total.toLocaleString()}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="receipt-total">
+        <table style="margin-left:auto">
+          <tr><td style="padding:4px 16px;color:#64748b">ราคาก่อน VAT</td><td style="padding:4px"><strong>฿${Math.round(total/1.07).toLocaleString()}</strong></td></tr>
+          <tr><td style="padding:4px 16px;color:#64748b">VAT 7%</td><td style="padding:4px"><strong>฿${Math.round(total - total/1.07).toLocaleString()}</strong></td></tr>
+          <tr><td style="padding:4px 16px;color:#64748b;font-size:1.1rem;font-weight:700">รวมทั้งสิ้น</td><td style="padding:4px"><div class="amount">฿${total.toLocaleString()}</div></td></tr>
+        </table>
+        <div class="receipt-stamp">ชำระแล้ว PAID</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px">
+        <div style="text-align:center"><div style="border-top:1px solid #1a1d27;width:140px;margin:32px auto 0;padding-top:6px;font-size:0.8rem;color:#64748b">ผู้รับเงิน</div></div>
+        <div style="text-align:center"><div style="border-top:1px solid #1a1d27;width:140px;margin:32px auto 0;padding-top:6px;font-size:0.8rem;color:#64748b">ผู้ชำระเงิน</div></div>
+      </div>
+
+      <div class="receipt-footer">
+        <p>ขอบคุณที่ไว้วางใจ Little Stars Training Center</p>
+        <p style="margin-top:4px">เอกสารนี้ออกโดยระบบคอมพิวเตอร์ ไม่ต้องมีลายมือชื่อ</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-primary" onclick="printReceipt()">🖨 พิมพ์ใบเสร็จ</button>
+    </div>`;
+}
+
+function printReceipt() {
+  const content = document.getElementById('receiptDoc').outerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Receipt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+    <style>body{font-family:'Sarabun',sans-serif;margin:20px}@media print{body{margin:0}}</style>
+    </head><body>${content}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// ══════════════════════════════════════════════════════════════
+// USERS MANAGEMENT (Admin only)
+// ══════════════════════════════════════════════════════════════
+async function renderUsers() {
+  if (APP.role !== 'admin') { navigateTo('dashboard'); return; }
+  const users = arr(await api('getUsers'));
+  const el = document.getElementById('pageContent');
+
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-heading">⚙️ จัดการผู้ใช้งาน</div>
+      <button class="btn-primary" onclick="openUserForm()">+ เพิ่มผู้ใช้</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr>
+      <th>ชื่อ</th><th>อีเมล</th><th>บทบาท</th><th>สถานะ</th><th>สร้างเมื่อ</th><th>Actions</th>
+    </tr></thead><tbody>
+    ${users.map(u=>`<tr>
+      <td class="font-bold">${u.name||'-'}</td>
+      <td>${u.email||'-'}</td>
+      <td><span class="badge ${u.role==='admin'?'badge-accent':u.role==='trainer'?'badge-primary':'badge-success'}">${roleLabel(u.role)}</span></td>
+      <td><span class="badge ${u.active?'badge-success':'badge-muted'}">${u.active?'ใช้งาน':'ปิด'}</span></td>
+      <td class="text-muted text-sm">${(u.createdAt||'').split('T')[0]}</td>
+      <td class="flex gap-2">
+        <button class="btn-icon" onclick="openUserForm('${u.id}')">✏️</button>
+        <button class="btn-icon" onclick="toggleUserActive('${u.id}',${!u.active})">${u.active?'🚫':'✅'}</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+async function openUserForm(id = null) {
+  let u = {};
+  if (id) { const users = arr(await api('getUsers')); u = users.find(r => r.id === id) || {}; }
+  openModal(`
+    <div class="modal-title">${id?'✏️ แก้ไขผู้ใช้':'+ เพิ่มผู้ใช้'}</div>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อ</label><input type="text" id="uName" value="${u.name||''}"></div>
+      <div class="form-group"><label>บทบาท</label>
+        <select id="uRole"><option value="admin"${u.role==='admin'?' selected':''}>Admin</option><option value="trainer"${u.role==='trainer'?' selected':''}>Trainer</option><option value="parent"${u.role==='parent'?' selected':''}>Parent</option></select></div>
+    </div>
+    <div class="form-group"><label>อีเมล</label><input type="email" id="uEmail" value="${u.email||''}"></div>
+    ${!id?`<div class="form-group"><label>รหัสผ่าน</label><input type="password" id="uPw"></div>`:''}
+    <div class="form-group"><label>โทรศัพท์ (สำหรับ Trainer/Parent)</label><input type="tel" id="uPhone" value="${u.phone||''}"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitUser('${id||''}')">บันทึก</button>
+    </div>
+  `);
+}
+
+async function submitUser(id) {
+  const payload = { name: document.getElementById('uName').value, email: document.getElementById('uEmail').value, role: document.getElementById('uRole').value, phone: document.getElementById('uPhone')?.value||'' };
+  if (!id) payload.password = document.getElementById('uPw').value;
+  if (id) payload.id = id;
+  const r = await api(id ? 'updateUser' : 'createUser', payload);
+  if (r.error) { toast(r.error, 'error'); return; }
+  toast(id ? 'อัปเดตผู้ใช้แล้ว' : 'เพิ่มผู้ใช้แล้ว');
+  closeModal(); renderUsers();
+}
+
+async function toggleUserActive(id, active) {
+  await api('toggleUser', { id, active });
+  toast(active ? 'เปิดใช้งานแล้ว' : 'ปิดใช้งานแล้ว');
+  renderUsers();
+}
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════
+function statusBadge(s) {
+  return { completed:'badge-success', scheduled:'badge-warning', cancelled:'badge-muted' }[s] || 'badge-muted';
+}
+function statusLabel(s) {
+  return { completed:'✅ สอนแล้ว', scheduled:'📅 ระหว่างนัด', cancelled:'❌ ยกเลิก' }[s] || s;
+}
+function monthShort(dateStr) {
+  if (!dateStr) return '';
+  const m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const parts = dateStr.toString().split('-');
+  return m[Number(parts[1])-1] || '';
+}
+
+// ── Enter key login ────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginScreen') && !document.getElementById('loginScreen').classList.contains('hidden')) doLogin();
+});
+
+// ══════════════════════════════════════════════════════════════
+// PDPA CONSENT SYSTEM
+// ══════════════════════════════════════════════════════════════
+async function checkConsent() {
+  // ตรวจ sessionStorage ก่อน — ถ้า consent แล้วในเซสชันนี้ ไม่ต้องเรียก API ซ้ำ
+  if (sessionStorage.getItem('ls_consented') === 'true') return true;
+
+  try {
+    const status = await apiRaw('getConsentStatus', {});
+
+    // ถ้า API error (เช่น unauthorized) ให้ผ่านไปก่อน ไม่ block login
+    if (!status || status.error) return true;
+
+    // consent แล้วให้ผ่านได้เลย (re-consent เฉพาะตอน policy เปลี่ยน version จริงๆ)
+    if (status.hasConsent) {
+      sessionStorage.setItem('ls_consented', 'true');
+      return true;
+    }
+  } catch(e) {
+    console.warn('checkConsent error:', e);
+    return true; // ถ้า error ให้ผ่านไปก่อน
+  }
+
+  // ยังไม่ consent — แสดง modal
+  return new Promise(resolve => showConsentModal(resolve));
+}
+
+// api that doesn't normalise to [] — for non-array responses
+async function apiRaw(action, payload = {}) {
+  try {
+    const r = await gasCall(action, payload);
+    if (r && r.error === 'unauthorized') {
+      toast('Session หมดอายุ กรุณา Login ใหม่', 'error');
+      setTimeout(doLogout, 1500); return { error: 'unauthorized' };
+    }
+    return r || {};
+  } catch(e) {
+    console.error('[apiRaw fail]', action, e);
+    return { error: e.message || 'Network error' };
+  }
+}
+
+function showConsentModal(resolve) {
+  const backdrop = document.getElementById('consentBackdrop');
+  if (!backdrop) {
+    const div = document.createElement('div');
+    div.id = 'consentBackdrop';
+    div.className = 'consent-backdrop';
+    document.body.appendChild(div);
+  }
+  document.getElementById('consentBackdrop').innerHTML = `
+    <div class="consent-box">
+      <div class="consent-header">
+        <span class="consent-logo">🛡️</span>
+        <div>
+          <h2>นโยบายความเป็นส่วนตัว</h2>
+          <p class="text-muted text-sm">กรุณาอ่านและให้ความยินยอมก่อนเข้าใช้งาน</p>
+        </div>
+      </div>
+      <div class="consent-body" id="consentPolicyText">
+        <div class="loading-spinner" style="min-height:120px"><div class="spinner"></div></div>
+      </div>
+      <div class="consent-footer">
+        <label class="consent-check">
+          <input type="checkbox" id="consentAgree" onchange="document.getElementById('consentBtn').disabled=!this.checked">
+          <span>ข้าพเจ้าได้อ่านและยอมรับนโยบายความเป็นส่วนตัวแล้ว</span>
+        </label>
+        <div class="form-actions" style="margin-top:12px">
+          <button class="btn-secondary" onclick="denyConsent()">ปฏิเสธ (ออกจากระบบ)</button>
+          <button class="btn-primary" id="consentBtn" disabled onclick="grantConsent()">✅ ยอมรับและเข้าใช้งาน</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('consentBackdrop').style.display = 'flex';
+
+  // Store resolve so grantConsent/denyConsent can call it
+  window._consentResolve = resolve;
+
+  // Load policy text
+  apiRaw('getPdpaPolicy', {}).then(p => {
+    const el = document.getElementById('consentPolicyText');
+    if (el && p.content) el.innerHTML = `<div class="pdpa-policy-text">${p.content}</div>`;
+  });
+}
+
+async function grantConsent() {
+  await apiRaw('recordConsent', { granted: true, userAgent: navigator.userAgent });
+  sessionStorage.setItem('ls_consented', 'true'); // จำไว้ตลอด session
+  document.getElementById('consentBackdrop').style.display = 'none';
+  if (window._consentResolve) { window._consentResolve(true); window._consentResolve = null; }
+}
+
+function denyConsent() {
+  document.getElementById('consentBackdrop').style.display = 'none';
+  doLogout();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PHOTO UPLOAD MODULE
+// ══════════════════════════════════════════════════════════════
+
+// Universal photo uploader — returns Promise<{fileUrl, thumbUrl, photoId}>
+function uploadPhotoUI(category, linkedId, linkedType, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const label   = opts.label || 'อัปโหลดรูปภาพ';
+    const accept  = category === 'payments' ? 'image/*,application/pdf' : 'image/*';
+    const maxMB   = (category === 'children' || category === 'parents') ? 2 : 5;
+
+    // Create hidden file input
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = accept;
+    inp.style.display = 'none';
+    document.body.appendChild(inp);
+
+    inp.onchange = () => {
+      const file = inp.files[0];
+      document.body.removeChild(inp);
+      if (!file) { reject('cancelled'); return; }
+
+      if (file.size > maxMB * 1024 * 1024) {
+        toast(`ไฟล์ใหญ่เกิน ${maxMB}MB`, 'error'); reject('size'); return;
+      }
+
+      toast('⏳ กำลังอัปโหลด...', 'success');
+
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const base64 = e.target.result.split(',')[1];
+        const result = await apiRaw('uploadPhoto', {
+          category, linkedId, linkedType,
+          fileName: file.name, mimeType: file.type, base64Data: base64,
+        });
+        if (result.error) { toast(result.error, 'error'); reject(result.error); return; }
+        toast('อัปโหลดสำเร็จ ✓');
+        resolve(result);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    inp.click();
+  });
+}
+
+// Photo gallery component
+async function renderPhotoGallery(containerId, linkedId, category, canDelete = false) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '<div class="text-muted text-sm">กำลังโหลดรูป...</div>';
+
+  const photos = arr(await api('getPhotos', { linkedId, category }));
+  if (!photos.length) { container.innerHTML = '<div class="text-muted text-sm">ยังไม่มีรูปภาพ</div>'; return; }
+
+  container.innerHTML = `<div class="photo-grid">
+    ${photos.filter(p => !p.deleted).map(p => `
+      <div class="photo-card" id="photo_${p.id}">
+        <img src="${p.thumbUrl || p.fileUrl}" alt="photo"
+          onerror="this.src='https://via.placeholder.com/120x90?text=No+Image'"
+          onclick="viewPhoto('${p.fileUrl}','${p.fileName}')">
+        <div class="photo-meta text-sm">${(p.fileName||'').substring(0,20)}</div>
+        ${canDelete ? `<button class="btn-danger btn-sm" style="width:100%;margin-top:4px" onclick="deletePhotoById('${p.id}','${containerId}','${linkedId}','${category}')">🗑 ลบ</button>` : ''}
+      </div>`).join('')}
+  </div>`;
+}
+
+function viewPhoto(url, name) {
+  openModal(`
+    <div class="modal-title">🖼 ${name||'รูปภาพ'}</div>
+    <div style="text-align:center">
+      <img src="${url}" style="max-width:100%;max-height:60vh;border-radius:8px;object-fit:contain"
+        onerror="this.alt='ไม่สามารถโหลดรูปได้'">
+    </div>
+    <div class="form-actions" style="justify-content:center;margin-top:12px">
+      <a href="${url}" target="_blank" class="btn-primary">🔗 เปิดใน Drive</a>
+    </div>`);
+}
+
+async function deletePhotoById(photoId, containerId, linkedId, category) {
+  if (!confirm('ลบรูปภาพนี้?')) return;
+  const r = await apiRaw('deletePhoto', { photoId });
+  if (r.error) { toast(r.error, 'error'); return; }
+  toast('ลบรูปแล้ว');
+  renderPhotoGallery(containerId, linkedId, category, true);
+}
+
+// ── Photo upload button helper ────────────────────────────────
+function makeUploadBtn(category, linkedId, linkedType, galleryId, canDelete) {
+  return `<button class="btn-secondary btn-sm" onclick="handleUpload('${category}','${linkedId}','${linkedType}','${galleryId}',${canDelete})">📷 อัปโหลดรูป</button>`;
+}
+
+async function handleUpload(category, linkedId, linkedType, galleryId, canDelete) {
+  try {
+    await uploadPhotoUI(category, linkedId, linkedType);
+    renderPhotoGallery(galleryId, linkedId, category, canDelete);
+  } catch(e) {
+    if (e !== 'cancelled') console.error(e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PATCH: People page — add photo upload to parent & child forms
+// ══════════════════════════════════════════════════════════════
+// Override openParentForm — เพิ่ม fields ครบและ photo section
+const _origOpenParentForm = openParentForm;
+async function openParentForm(id = null) {
+  let p = {};
+  if (id) { const rows = arr(await api('getParents', {})); p = rows.find(r => r.id === id) || {}; }
+  const canEdit = APP.role === 'admin';
+
+
+  openModal(`
+    <div class="modal-title">${id?'✏️ แก้ไขผู้ปกครอง':'+ เพิ่มผู้ปกครอง'}</div>
+
+    ${id ? `<div style="margin-bottom:14px">
+      <label style="display:block;font-size:0.82rem;color:var(--c-muted);margin-bottom:6px">📷 รูปโปรไฟล์</label>
+      <div id="parentPhotoGallery_${id}" style="margin-bottom:8px"></div>
+      ${canEdit ? makeUploadBtn('parents', id, 'parent', 'parentPhotoGallery_'+id, true) : ''}
+    </div>` : ''}
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">👤 ข้อมูลทั่วไป</p>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อ-นามสกุล *</label>
+        <input type="text" id="pName" value="${p.name||''}" placeholder="ชื่อจริง นามสกุล"></div>
+      <div class="form-group"><label>ชื่อเล่น</label>
+        <input type="text" id="pNickname" value="${p.nickname||''}" placeholder="ชื่อเล่น"></div>
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">📞 ช่องทางติดต่อ</p>
+    <div class="form-row">
+      <div class="form-group"><label>โทรศัพท์หลัก</label>
+        <input type="tel" id="pPhone" value="${p.phone||''}" placeholder="08x-xxx-xxxx"></div>
+      <div class="form-group"><label>โทรศัพท์สำรอง</label>
+        <input type="tel" id="pPhoneAlt" value="${p.phoneAlt||''}" placeholder="08x-xxx-xxxx"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>อีเมล</label>
+        <input type="email" id="pEmail" value="${p.email||''}" placeholder="email@example.com"></div>
+      <div class="form-group"><label>Line ID</label>
+        <input type="text" id="pLineId" value="${p.lineId||''}" placeholder="Line ID"></div>
+    </div>
+    <div class="form-group"><label>ที่อยู่</label>
+      <textarea id="pAddr" rows="2">${p.address||''}</textarea></div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🧾 ข้อมูลการเงิน / ใบเสร็จ</p>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อสำหรับออกใบเสร็จ</label>
+        <input type="text" id="pReceiptName" value="${p.receiptName||''}" placeholder="ถ้าต่างจากชื่อข้างต้น"></div>
+      <div class="form-group"><label>เลขประจำตัวผู้เสียภาษี</label>
+        <input type="text" id="pTaxId" value="${p.taxId||''}" placeholder="13 หลัก (ถ้ามี)" maxlength="13"></div>
+    </div>
+
+
+    ${canEdit ? `<div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitParent('${id||''}')">💾 บันทึก</button>
+    </div>` : ''}
+  `);
+  if (id) renderPhotoGallery('parentPhotoGallery_'+id, id, 'parents', canEdit);
+}
+
+// Override openChildForm — เพิ่ม photo section + ข้อมูลการแพทย์
+const _origOpenChildForm = openChildForm;
+async function openChildForm(id = null) {
+  const parents = arr(await api('getParents', {}));
+  if (!parents.length) { toast('กรุณาเพิ่มข้อมูลผู้ปกครองก่อน', 'error'); return; }
+  let c = {};
+  if (id) { const rows = arr(await api('getChildren', {})); c = rows.find(r => r.id === id) || {}; }
+
+  // สร้าง parent options โดยเปรียบเทียบแบบ string
+  const parentOpts = parents.map(p => {
+    const selected = String(p.id) === String(c.parentId) ? ' selected' : '';
+    return `<option value="${p.id}"${selected}>${p.name}</option>`;
+  }).join('');
+  const canEdit = APP.role === 'admin';
+
+  openModal(`
+    ${id ? `
+    <div style="margin-bottom:14px">
+      <label class="text-muted text-sm" style="display:block;margin-bottom:6px">📷 รูปโปรไฟล์</label>
+      <div id="childPhotoGallery_${id}" style="margin-bottom:8px"></div>
+      ${canEdit ? makeUploadBtn('children', id, 'child', 'childPhotoGallery_'+id, true) : ''}
+    </div>` : ''}
+    <div class="modal-title">${id?'✏️ แก้ไขข้อมูลเด็ก':'+ เพิ่มเด็ก'}</div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">👤 ข้อมูลทั่วไป</p>
+    <div class="form-group"><label>ผู้ปกครอง *</label>
+      <select id="cParent"><option value="">-- เลือกผู้ปกครอง --</option>${parentOpts}</select>
+    </div>
+
+    <div class="form-group"><label>ความสัมพันธ์ของผู้ปกครองกับเด็กคนนี้</label>
+      <select id="cParentRelationship">
+        ${['','พ่อ','แม่','ปู่','ย่า','ตา','ยาย','ลุง','ป้า','น้า','อา','ผู้ปกครองตามกฎหมาย','อื่นๆ']
+          .map(r => `<option value="${r}"${c.parentRelationship===r?' selected':''}>${r||'-- ระบุความสัมพันธ์ --'}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อ-นามสกุล *</label><input type="text" id="cName" value="${c.name||''}"></div>
+      <div class="form-group"><label>ชื่อเล่น</label><input type="text" id="cNick" value="${c.nickname||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>วันเกิด</label><input type="date" id="cDob" value="${c.dob||''}"></div>
+      <div class="form-group"><label>เพศ</label>
+        <select id="cGender">
+          <option value="M"${c.gender==='M'?' selected':''}>ชาย</option>
+          <option value="F"${c.gender==='F'?' selected':''}>หญิง</option>
+        </select>
+      </div>
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">📏 ข้อมูลร่างกาย</p>
+    <div class="form-row">
+      <div class="form-group"><label>น้ำหนัก (กก.)</label><input type="number" id="cWeight" value="${c.weight||''}" step="0.1" min="0" placeholder="เช่น 18.5"></div>
+      <div class="form-group"><label>ส่วนสูง (ซม.)</label><input type="number" id="cHeight" value="${c.height||''}" step="0.1" min="0" placeholder="เช่น 110.0"></div>
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🏥 ข้อมูลทางการแพทย์</p>
+    <div class="form-row">
+      <div class="form-group"><label>กรุ๊ปเลือด</label>
+        <select id="cBloodType">
+          ${['','A','B','AB','O','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg=>`<option value="${bg}"${c.bloodType===bg?' selected':''}>${bg||'- ไม่ทราบ -'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>โรคประจำตัว / ประวัติการรักษา</label>
+        <input type="text" id="cMedicalConditions" value="${c.medicalConditions||''}" placeholder="เช่น หืดหอบ, ภูมิแพ้">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>⚠️ แพ้อาหาร</label>
+        <input type="text" id="cFoodAllergy" value="${c.foodAllergy||''}" placeholder="เช่น นมวัว, ถั่วลิสง">
+      </div>
+      <div class="form-group"><label>💊 แพ้ยา</label>
+        <input type="text" id="cDrugAllergy" value="${c.drugAllergy||''}" placeholder="เช่น เพนิซิลิน, แอสไพริน">
+      </div>
+    </div>
+    <div class="form-group"><label>ยาที่ใช้ประจำ</label>
+      <input type="text" id="cMedications" value="${c.medications||''}" placeholder="ชื่อยา / วิธีใช้">
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🆘 ติดต่อฉุกเฉิน</p>
+    <div class="form-row">
+      <div class="form-group"><label>ชื่อผู้ติดต่อฉุกเฉิน</label>
+        <input type="text" id="cEmergencyContact" value="${c.emergencyContact||''}" placeholder="ชื่อ-นามสกุล">
+      </div>
+      <div class="form-group"><label>ความสัมพันธ์</label>
+        <input type="text" id="cEmergencyRelation" value="${c.emergencyRelation||''}" placeholder="เช่น พ่อ, แม่, ย่า">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>เบอร์โทรฉุกเฉิน</label>
+        <input type="tel" id="cEmergencyPhone" value="${c.emergencyPhone||''}" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="form-group"><label>ชื่อแพทย์ / โรงพยาบาล</label>
+        <input type="text" id="cDoctorName" value="${c.doctorName||''}" placeholder="นพ. ... / รพ. ...">
+      </div>
+    </div>
+    <div class="form-group"><label>เบอร์แพทย์ / โรงพยาบาล</label>
+      <input type="tel" id="cDoctorPhone" value="${c.doctorPhone||''}" placeholder="0x-xxx-xxxx">
+    </div>
+
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">🎯 พัฒนาการและการฝึก</p>
+    <div class="form-group"><label>โรงเรียนที่เรียน</label>
+      <input type="text" id="cSchool" value="${c.school||''}" placeholder="ชื่อโรงเรียน">
+    </div>
+    <div class="form-group"><label>เป้าหมายที่ต้องการพัฒนา</label>
+      <input type="text" id="cTrainingGoal" value="${c.trainingGoal||''}" placeholder="เช่น เพิ่มความมั่นใจ, ลดน้ำหนัก, เสริมทักษะการเล่นกีฬา">
+    </div>
+    <div class="form-group"><label>⚠️ ข้อจำกัดทางร่างกาย</label>
+      <input type="text" id="cPhysicalLimitation" value="${c.physicalLimitation||''}" placeholder="เช่น ขาซ้ายเคยหัก อย่าให้วิ่งนาน, ปวดหลังเรื้อรัง">
+    </div>
+    <p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-muted);margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--c-border)">📝 หมายเหตุ</p>
+    <div class="form-group">
+      <textarea id="cNotes" rows="3" placeholder="ข้อมูลเพิ่มเติมที่ Trainer ควรทราบ...">${c.notes||''}</textarea>
+    </div>
+    ${canEdit ? `<div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitChild('${id||''}')">💾 บันทึก</button>
+    </div>` : ''}
+  `);
+  if (id) renderPhotoGallery('childPhotoGallery_'+id, id, 'children', canEdit);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PATCH: Activity Log — add photo section
+// ══════════════════════════════════════════════════════════════
+const _origOpenActivityForm = openActivityForm;
+function openActivityForm(sessionId, childName, courseName) {
+  let rating = 0;
+  openModal(`
+    <div class="modal-title">📝 บันทึกกิจกรรม</div>
+    <p class="text-muted text-sm" style="margin-bottom:16px">${childName} — ${courseName}</p>
+    <div class="form-group"><label>บันทึกสรุปการเรียน</label>
+      <textarea id="actNote" rows="4" placeholder="อธิบายกิจกรรมที่ทำ พัฒนาการ..."></textarea></div>
+    <div class="form-group"><label>ทักษะที่ฝึก</label>
+      <div class="skill-chips" id="skillChips">
+        ${SKILL_LIST.map(sk=>`<div class="skill-chip" onclick="toggleSkill(this,'${sk}')">${sk}</div>`).join('')}
+      </div></div>
+    <div class="form-group"><label>คะแนนการเรียน</label>
+      <div class="star-rating" id="starRating">
+        ${[1,2,3,4,5].map(n=>`<button class="star-btn" onclick="setRating(${n})">★</button>`).join('')}
+      </div></div>
+    <div class="form-group">
+      <label>รูปภาพกิจกรรม</label>
+      <div id="actPhotoArea" style="margin:8px 0">
+        <p class="text-muted text-sm">💡 บันทึกก่อน แล้วค่อยอัปโหลดรูปภายหลังได้</p>
+      </div>
+    </div>
+    <input type="hidden" id="actSessionId" value="${sessionId}">
+    <input type="hidden" id="actRating" value="0">
+    <input type="hidden" id="actSkills" value="">
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitActivity()">บันทึก ✓</button>
+    </div>
+  `);
+}
+
+// After activity saved, show photo upload option
+const _origSubmitActivity = submitActivity;
+async function submitActivity() {
+  const sessionId = document.getElementById('actSessionId').value;
+  const note = document.getElementById('actNote').value;
+  const skills = document.getElementById('actSkills').value;
+  const rating = document.getElementById('actRating').value;
+  if (!note) { toast('กรุณาเขียนบันทึกสรุป', 'error'); return; }
+  await api('saveActivity', { sessionId, note, skills, rating });
+  toast('บันทึกกิจกรรมสำเร็จ ✓');
+  // Show photo upload option
+  const area = document.getElementById('actPhotoArea');
+  if (area) {
+    area.innerHTML = `
+      <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.3);border-radius:8px;padding:12px">
+        <p class="text-sm" style="margin-bottom:8px">✅ บันทึกแล้ว — ต้องการเพิ่มรูปภาพกิจกรรมไหม?</p>
+        <div id="actGallery_${sessionId}" style="margin-bottom:8px"></div>
+        ${makeUploadBtn('activities', sessionId, 'session', 'actGallery_'+sessionId, true)}
+      </div>`;
+    renderPhotoGallery('actGallery_'+sessionId, sessionId, 'activities', true);
+  }
+  renderActivity();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PATCH: Finance — payment proof photo upload
+// ══════════════════════════════════════════════════════════════
+const _origOpenPaymentModal = openPaymentModal;
+function openPaymentModal(sessionId, paymentId, fee) {
+  openModal(`
+    <div class="modal-title">💳 อัปเดตการชำระเงิน</div>
+    <div class="form-group"><label>ค่าตอบแทน (฿)</label><input type="number" id="pmAmt" value="${fee}"></div>
+    <div class="form-group"><label>สถานะ</label>
+      <select id="pmStatus"><option value="unpaid">ค้างจ่าย</option><option value="paid">จ่ายแล้ว</option></select></div>
+    <div class="form-group"><label>วิธีชำระ</label>
+      <select id="pmMethod"><option value="cash">เงินสด</option><option value="transfer">โอนเงิน</option><option value="cheque">เช็ค</option></select></div>
+    <div class="form-group">
+      <label>หลักฐานการจ่าย</label>
+      <div id="payProofGallery_${sessionId}" style="margin:8px 0"></div>
+      ${makeUploadBtn('payments', sessionId, 'payment', 'payProofGallery_'+sessionId, true)}
+      <input type="text" id="pmProof" placeholder="หรือวาง URL / หมายเหตุ" style="margin-top:8px">
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitPayment('${sessionId}')">บันทึก</button>
+    </div>
+  `);
+  renderPhotoGallery('payProofGallery_'+sessionId, sessionId, 'payments', true);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PDPA DASHBOARD PAGE
+// ══════════════════════════════════════════════════════════════
+async function renderPdpa() {
+  const el = document.getElementById('pageContent');
+
+  // Non-admin: show personal PDPA options
+  if (APP.role !== 'admin') {
+    const status = await apiRaw('getConsentStatus', {});
+    el.innerHTML = `
+      <div class="page-heading" style="margin-bottom:20px">🛡️ ความเป็นส่วนตัวของฉัน</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:12px">สถานะความยินยอม</div>
+        <div class="flex items-center gap-2" style="margin-bottom:8px">
+          <span class="badge ${status.hasConsent?'badge-success':'badge-danger'}">
+            ${status.hasConsent?'✅ ให้ความยินยอมแล้ว':'❌ ยังไม่ให้ความยินยอม'}
+          </span>
+          ${status.grantedAt?`<span class="text-muted text-sm">เมื่อ ${status.grantedAt.split('T')[0]}</span>`:''}
+        </div>
+        ${!status.hasConsent?`<button class="btn-primary btn-sm" onclick="showConsentModal(()=>location.reload())">ให้ความยินยอม</button>`:''}
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:12px">สิทธิ์ของคุณตาม PDPA</div>
+        <div class="form-group">
+          <button class="btn-secondary" style="width:100%;margin-bottom:8px" onclick="exportMyDataUI()">
+            📥 Export ข้อมูลส่วนตัวทั้งหมด
+          </button>
+          <button class="btn-danger" style="width:100%" onclick="requestErasureUI()">
+            🗑 ขอลบข้อมูลส่วนตัว (Right to Erasure)
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">นโยบายความเป็นส่วนตัว</div>
+        <div id="policyDisplay" class="pdpa-policy-text text-sm"></div>
+      </div>`;
+    apiRaw('getPdpaPolicy', {}).then(p => {
+      const el2 = document.getElementById('policyDisplay');
+      if (el2 && p.content) el2.innerHTML = p.content;
+    });
+    return;
+  }
+
+  // Admin: full dashboard
+  const data = await apiRaw('getPdpaDashboard', {});
+  if (!data || data.error) { el.innerHTML = '<p class="text-muted">ไม่สามารถโหลดข้อมูลได้</p>'; return; }
+
+  const s = data.summary || {};
+  el.innerHTML = `
+    <div class="page-header">
+      <div class="page-heading">🛡️ PDPA Dashboard</div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${s.totalUsers||0}</div><div class="stat-label">ผู้ใช้ทั้งหมด</div></div>
+      <div class="stat-card" style="border-color:var(--c-success)"><div class="stat-icon">✅</div><div class="stat-value" style="color:var(--c-success)">${s.consentGranted||0}</div><div class="stat-label">ให้ความยินยอมแล้ว</div></div>
+      <div class="stat-card" style="border-color:var(--c-warning)"><div class="stat-icon">⚠️</div><div class="stat-value" style="color:var(--c-warning)">${s.noConsent||0}</div><div class="stat-label">ยังไม่ให้ความยินยอม</div></div>
+      <div class="stat-card" style="border-color:var(--c-danger)"><div class="stat-icon">📋</div><div class="stat-value" style="color:var(--c-danger)">${s.pendingRequests||0}</div><div class="stat-label">คำขอรอดำเนินการ</div></div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchPdpaTab(this,'pdpaRequests')">คำขอ PDPA (${s.pendingRequests||0})</button>
+      <button class="tab-btn" onclick="switchPdpaTab(this,'pdpaConsents')">✅ Consent แล้ว (${s.consentGranted||0})</button>
+      <button class="tab-btn" onclick="switchPdpaTab(this,'pdpaNoConsent')">⚠️ ยังไม่ยินยอม (${s.noConsent||0})</button>
+      <button class="tab-btn" onclick="switchPdpaTab(this,'pdpaAccessLog')">Access Log</button>
+    </div>
+
+    <div id="pdpaRequests">
+      ${!arr(data.pendingRequests).length
+        ? '<p class="text-muted" style="padding:20px">ไม่มีคำขอที่รอดำเนินการ</p>'
+        : `<div class="table-wrap"><table><thead><tr>
+            <th>ผู้ขอ</th><th>ประเภท</th><th>เหตุผล</th><th>วันที่ขอ</th><th>Actions</th>
+          </tr></thead><tbody>
+          ${arr(data.pendingRequests).map(r=>`<tr>
+            <td class="font-bold">${r.userName||r.userId}</td>
+            <td><span class="badge badge-warning">${r.requestType}</span></td>
+            <td>${r.reason||'-'}</td>
+            <td>${(r.requestedAt||'').split('T')[0]}</td>
+            <td class="flex gap-2">
+              <button class="btn-primary btn-sm" onclick="processRequest('${r.id}','approve')">✅ อนุมัติ</button>
+              <button class="btn-danger btn-sm" onclick="processRequest('${r.id}','reject')">❌ ปฏิเสธ</button>
+            </td>
+          </tr>`).join('')}
+          </tbody></table></div>`}
+    </div>
+
+    <div id="pdpaConsents" class="hidden">
+      ${!arr(data.allConsents).filter(c=>c.status==='granted').length
+        ? '<p class="text-muted" style="padding:20px">ยังไม่มีผู้ใช้ที่ให้ความยินยอม</p>'
+        : `<div class="table-wrap"><table><thead><tr>
+            <th>ผู้ใช้</th><th>สถานะ</th><th>Policy Version</th><th>วันที่ยินยอม</th>
+          </tr></thead><tbody>
+          ${arr(data.allConsents).map(c=>`<tr>
+            <td style="font-weight:600">${c.userName||c.userId||'-'}</td>
+            <td><span class="badge ${c.status==='granted'?'badge-success':c.status==='revoked'?'badge-muted':'badge-danger'}">
+              ${c.status==='granted'?'✅ ยินยอม':c.status==='revoked'?'🔒 ถูกเพิกถอน':'❌ ปฏิเสธ'}
+            </span></td>
+            <td><span class="badge badge-muted">v${c.version||'-'}</span></td>
+            <td style="color:var(--c-muted);font-size:0.82rem">${(c.grantedAt||'').split('T')[0]||'-'}</td>
+          </tr>`).join('')}
+          </tbody></table></div>`}
+    </div>
+
+    <div id="pdpaNoConsent" class="hidden">
+      ${!arr(data.noConsentUsers).length
+        ? '<p class="text-muted" style="padding:20px">ผู้ใช้ทุกคนให้ความยินยอมแล้ว ✅</p>'
+        : `<div class="table-wrap"><table><thead><tr><th>ชื่อ</th><th>อีเมล</th><th>บทบาท</th></tr></thead><tbody>
+          ${arr(data.noConsentUsers).map(u=>`<tr>
+            <td>${u.name}</td><td>${u.email}</td>
+            <td><span class="badge badge-muted">${u.role}</span></td>
+          </tr>`).join('')}
+          </tbody></table></div>`}
+    </div>
+
+    <div id="pdpaAccessLog" class="hidden">
+      <div class="table-wrap"><table><thead><tr>
+        <th>เวลา</th><th>ผู้ใช้</th><th>Action</th><th>ประเภทข้อมูล</th><th>Target</th>
+      </tr></thead><tbody>
+      ${arr(data.recentLogs).map(l=>`<tr>
+        <td class="text-muted text-sm">${(l.accessedAt||'').replace('T',' ').split('.')[0]}</td>
+        <td>${l.userId}</td>
+        <td><span class="badge ${l.action==='DELETE_PHOTO'||l.action==='ERASURE_APPROVED'?'badge-danger':l.action==='UPLOAD'?'badge-primary':'badge-muted'}">${l.action}</span></td>
+        <td>${l.dataType||'-'}</td>
+        <td class="text-muted text-sm">${l.targetId||'-'}</td>
+      </tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+}
+
+function switchPdpaTab(btn, which) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['pdpaRequests','pdpaConsents','pdpaNoConsent','pdpaAccessLog'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', id !== which);
+  });
+}
+
+async function processRequest(requestId, action) {
+  let notes;
+  if (action === 'approve') {
+    notes = prompt('หมายเหตุการอนุมัติ (ถ้ามี):');
+    if (notes === null) return; // user กด Cancel
+    notes = notes || '';
+  } else {
+    notes = prompt('เหตุผลการปฏิเสธ (จำเป็น):');
+    if (notes === null) return; // user กด Cancel
+    if (!notes.trim()) { toast('กรุณาระบุเหตุผลการปฏิเสธ', 'error'); return; }
+  }
+  const r = await apiRaw('processErasureRequest', { requestId, action, notes });
+  if (r.error) { toast(r.error, 'error'); return; }
+  toast(action === 'approve' ? 'อนุมัติและลบข้อมูลแล้ว' : 'ปฏิเสธคำขอแล้ว');
+  renderPdpa();
+}
+
+async function exportMyDataUI() {
+  toast('⏳ กำลัง Export ข้อมูล...');
+  const data = await apiRaw('exportMyData', {});
+  if (!data || data.error) { toast('Export ไม่สำเร็จ', 'error'); return; }
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `my_data_${new Date().toISOString().split('T')[0]}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Export สำเร็จ ดาวน์โหลดแล้ว ✓');
+}
+
+async function requestErasureUI() {
+  const reason = prompt('กรุณาระบุเหตุผลในการขอลบข้อมูล:');
+  if (!reason) return;
+  if (!confirm('ยืนยันขอลบข้อมูลส่วนตัวทั้งหมด? Admin จะตรวจสอบและดำเนินการภายใน 30 วัน')) return;
+  const r = await apiRaw('requestDataErasure', { reason });
+  toast(r.message || 'ส่งคำขอแล้ว');
+}
+</script>
+</html>
