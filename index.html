@@ -1435,7 +1435,7 @@ tbody tr:last-child td { border-bottom: none; }
 // ============================================================
 // CONFIG — แก้ค่านี้หลัง deploy GAS
 // ============================================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwuycMVX9sKNEbF-84Ptzr-GT5JKCPUrM9IhSE2a23QsBCjKRMnXQDbd7hVpdT3GObU6Q/exec';
+const GAS_URL = 'YOUR_GAS_WEB_APP_URL'; // https://script.google.com/macros/s/xxx/exec
 
 // ── GAS fetch wrapper (แทน google.script.run) ────────────────
 async function gasCall(action, payload = {}) {
@@ -1471,7 +1471,7 @@ window.onload = () => {
 };
 
 // ── Auth ──────────────────────────────────────────────────────
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   const errEl = document.getElementById('loginError');
@@ -3886,7 +3886,7 @@ function denyConsent() {
 // ══════════════════════════════════════════════════════════════
 
 // Universal photo uploader — returns Promise<{fileUrl, thumbUrl, photoId}>
-function uploadPhotoUI(category, linkedId, linkedType, opts = {}) {
+async function uploadPhotoUI(category, linkedId, linkedType, opts = {}) {
   return new Promise((resolve, reject) => {
     const label   = opts.label || 'อัปโหลดรูปภาพ';
     const accept  = category === 'payments' ? 'image/*,application/pdf' : 'image/*';
