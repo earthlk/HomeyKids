@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Little Stars Training Center</title>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
 /* ── Design Tokens ─────────────────────────────────────────── */
 :root {
@@ -1334,6 +1336,30 @@ tbody tr:last-child td { border-bottom: none; }
 @media (max-width: 768px) {
   .session-detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ── OAuth Login Buttons ─────────────────────────────────────── */
+.login-divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--c-muted); font-size:13px; }
+.login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--c-border); }
+.btn-oauth { width:100%; padding:11px 16px; border-radius:var(--radius); border:1.5px solid var(--c-border); background:var(--c-surface2); color:var(--c-text); font-size:15px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all .2s; margin-bottom:10px; }
+.btn-oauth:hover { border-color:var(--c-primary); background:var(--c-surface); }
+.btn-line { border-color:#06C755; }
+.btn-line:hover { background:#06C755; color:#fff; }
+.oauth-google-wrap .g_id_signin { width:100% !important; }
+/* ── OAuth Error Modal ───────────────────────────────────────── */
+.oauth-error-modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index:9999; }
+.oauth-error-modal.hidden { display:none; }
+.oauth-error-box { background:var(--c-surface); border-radius:var(--radius-lg); padding:32px 28px; max-width:360px; width:90%; text-align:center; border:1px solid var(--c-border); }
+.oauth-error-icon { font-size:40px; margin-bottom:12px; }
+.oauth-error-box h3 { margin:0 0 8px; color:var(--c-text); }
+.oauth-error-box p { color:var(--c-muted); margin:0 0 16px; font-size:14px; }
+.oauth-error-box small { display:block; color:var(--c-muted); font-size:12px; margin-bottom:16px; }
+/* ── OTP Modal ───────────────────────────────────────────────── */
+.otp-box { max-width:320px; }
+.otp-input { width:100%; text-align:center; font-size:28px; font-weight:700; letter-spacing:12px; padding:12px; border-radius:var(--radius); border:2px solid var(--c-border); background:var(--c-surface2); color:var(--c-text); margin-bottom:12px; box-sizing:border-box; }
+.otp-input:focus { outline:none; border-color:var(--c-primary); }
+.otp-resend { font-size:13px; color:var(--c-muted); margin-top:12px; }
+.otp-resend a { color:var(--c-primary); text-decoration:none; }
+
   </style>
 </head>
 <body>
@@ -1363,7 +1389,40 @@ tbody tr:last-child td { border-bottom: none; }
           <button class="btn-primary btn-login" onclick="doLogin()">
             <span id="loginBtnText">เข้าสู่ระบบ</span>
           </button>
+
+          <div class="login-divider"><span>หรือ</span></div>
+
+          <button class="btn-oauth btn-line" onclick="loginWithLine()">
+            <span class="oauth-icon">🟢</span> เข้าสู่ระบบด้วย LINE
+          </button>
+          <div id="googleSignInBtn" class="oauth-google-wrap"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal: OAuth Error -->
+    <div id="oauthErrorModal" class="oauth-error-modal hidden" onclick="closeOauthError()">
+      <div class="oauth-error-box" onclick="event.stopPropagation()">
+        <div class="oauth-error-icon">⚠️</div>
+        <p id="oauthErrorMsg">ไม่พบบัญชีในระบบ</p>
+        <small>กรุณาติดต่อ Admin เพื่อสร้างบัญชีก่อนใช้งาน</small>
+        <button class="btn-secondary" onclick="closeOauthError()">ปิด</button>
+      </div>
+    </div>
+
+    <!-- Modal: OTP Verification -->
+    <div id="otpModal" class="oauth-error-modal hidden">
+      <div class="oauth-error-box otp-box" onclick="event.stopPropagation()">
+        <div class="oauth-error-icon">🔐</div>
+        <h3>ยืนยันตัวตน</h3>
+        <p id="otpDesc">ระบบส่งรหัส OTP ไปยัง LINE ของคุณแล้ว</p>
+        <input type="text" id="otpInput" class="otp-input" placeholder="รหัส 6 หลัก" maxlength="6" inputmode="numeric">
+        <div id="otpError" class="login-error hidden"></div>
+        <button class="btn-primary btn-login" onclick="submitOtp()">
+          <span id="otpBtnText">ยืนยัน OTP</span>
+        </button>
+        <button class="btn-secondary" onclick="closeOtpModal()" style="margin-top:8px">ยกเลิก</button>
+        <p class="otp-resend">ไม่ได้รับรหัส? <a href="#" onclick="resendOtp();return false;">ส่งใหม่</a></p>
       </div>
     </div>
 
@@ -1436,6 +1495,166 @@ tbody tr:last-child td { border-bottom: none; }
 // CONFIG — แก้ค่านี้หลัง deploy GAS
 // ============================================================
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwuycMVX9sKNEbF-84Ptzr-GT5JKCPUrM9IhSE2a23QsBCjKRMnXQDbd7hVpdT3GObU6Q/exec';
+
+// ============================================================
+// OAuth Config (client-side only — secrets อยู่ใน Code.gs)
+// ============================================================
+const LINE_CLIENT_ID    = '2010560028';
+const GOOGLE_CLIENT_ID  = '95133922597-jdq0a4i4jc19thdjf32nrtjl2g2qlvbj.apps.googleusercontent.com';
+const REDIRECT_URI      = 'https://earthlk.github.io/HomeyKids/';
+
+// ── State สำหรับ OAuth flow ───────────────────────────────────
+let _oauthPendingLineId = null;  // lineUserId รอ OTP verify
+let _oauthPendingEmail  = null;  // email ที่จะ link
+
+// ── Google Sign-In init (เรียกหลัง GSI script โหลด) ──────────
+window.addEventListener('load', () => {
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCallback,
+      auto_select: false,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleSignInBtn'),
+      { theme: 'filled_black', size: 'large', width: 320, text: 'signin_with', shape: 'rectangular', locale: 'th' }
+    );
+  }
+});
+
+// ── LINE Login ────────────────────────────────────────────────
+function loginWithLine() {
+  const state = Math.random().toString(36).substring(2);
+  sessionStorage.setItem('line_state', state);
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id:     LINE_CLIENT_ID,
+    redirect_uri:  REDIRECT_URI,
+    state,
+    scope:         'profile openid email',
+  });
+  window.location.href = 'https://access.line.me/oauth2/v2.1/authorize?' + params;
+}
+
+// ── Google callback (JWT credential จาก GSI) ─────────────────
+async function handleGoogleCallback(response) {
+  const idToken = response.credential;
+  showOauthLoading('กำลังตรวจสอบ Google account...');
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'loginWithGoogle', idToken }),
+    }).then(r => r.json());
+    hideOauthLoading();
+    handleOauthResult(r);
+  } catch(e) { hideOauthLoading(); showOauthError('เกิดข้อผิดพลาด: ' + e.message); }
+}
+
+// ── รับ LINE callback (code จาก URL) ─────────────────────────
+async function handleLineCallback(code, state) {
+  const savedState = sessionStorage.getItem('line_state');
+  sessionStorage.removeItem('line_state');
+  if (state !== savedState) { showOauthError('LINE login ไม่ถูกต้อง (state mismatch)'); return; }
+  showOauthLoading('กำลังตรวจสอบ LINE account...');
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'loginWithLine', code, redirectUri: REDIRECT_URI }),
+    }).then(r => r.json());
+    hideOauthLoading();
+    if (r.requireOtp) {
+      // backend ส่ง OTP ทาง LINE OA แล้ว รอ user กรอก
+      _oauthPendingLineId = r.lineUserId;
+      _oauthPendingEmail  = r.email;
+      showOtpModal(r.email);
+    } else {
+      handleOauthResult(r);
+    }
+  } catch(e) { hideOauthLoading(); showOauthError('เกิดข้อผิดพลาด: ' + e.message); }
+}
+
+// ── Submit OTP ────────────────────────────────────────────────
+async function submitOtp() {
+  const otp = document.getElementById('otpInput').value.trim();
+  const errEl = document.getElementById('otpError');
+  const btn = document.getElementById('otpBtnText');
+  if (otp.length !== 6) { errEl.textContent = 'กรุณากรอกรหัส 6 หลัก'; errEl.classList.remove('hidden'); return; }
+  btn.textContent = 'กำลังตรวจสอบ...';
+  errEl.classList.add('hidden');
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'verifyOtp', otp, lineUserId: _oauthPendingLineId, email: _oauthPendingEmail }),
+    }).then(r => r.json());
+    btn.textContent = 'ยืนยัน OTP';
+    if (r.success) {
+      closeOtpModal();
+      handleOauthResult(r);
+    } else {
+      errEl.textContent = r.message || 'รหัส OTP ไม่ถูกต้อง';
+      errEl.classList.remove('hidden');
+    }
+  } catch(e) { btn.textContent = 'ยืนยัน OTP'; errEl.textContent = 'เกิดข้อผิดพลาด'; errEl.classList.remove('hidden'); }
+}
+
+// ── Resend OTP ────────────────────────────────────────────────
+async function resendOtp() {
+  if (!_oauthPendingLineId) return;
+  await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'resendOtp', lineUserId: _oauthPendingLineId, email: _oauthPendingEmail }),
+  });
+  toast('ส่งรหัส OTP ใหม่แล้ว');
+}
+
+// ── จัดการผลลัพธ์จาก OAuth ───────────────────────────────────
+function handleOauthResult(r) {
+  if (r.success) {
+    APP.token = r.token; APP.role = r.role; APP.name = r.name; APP.userId = r.userId;
+    sessionStorage.setItem('ls_session', JSON.stringify(APP));
+    checkConsent().then(ok => { if (ok) showApp(); });
+  } else {
+    showOauthError(r.message || 'ไม่พบบัญชีในระบบ กรุณาติดต่อ Admin');
+  }
+}
+
+// ── OTP Modal helpers ─────────────────────────────────────────
+function showOtpModal(email) {
+  document.getElementById('otpDesc').textContent = `ระบบส่งรหัส OTP ไปยัง LINE ของคุณแล้ว (${email})`;
+  document.getElementById('otpInput').value = '';
+  document.getElementById('otpError').classList.add('hidden');
+  document.getElementById('otpModal').classList.remove('hidden');
+  document.getElementById('otpInput').focus();
+}
+function closeOtpModal() {
+  document.getElementById('otpModal').classList.add('hidden');
+  _oauthPendingLineId = null; _oauthPendingEmail = null;
+}
+function showOauthError(msg) {
+  document.getElementById('oauthErrorMsg').textContent = msg;
+  document.getElementById('oauthErrorModal').classList.remove('hidden');
+}
+function closeOauthError() { document.getElementById('oauthErrorModal').classList.add('hidden'); }
+function showOauthLoading(msg) { toast(msg); }
+function hideOauthLoading() {}
+
+// ── ตรวจ URL params ตอนโหลดหน้า (LINE callback) ──────────────
+(function checkOauthCallback() {
+  const p = new URLSearchParams(window.location.search);
+  const code  = p.get('code');
+  const state = p.get('state');
+  const error = p.get('error');
+  if (error) { showOauthError('LINE login ถูกยกเลิก'); history.replaceState({}, '', REDIRECT_URI); return; }
+  if (code && state) {
+    // ล้าง URL แล้วค่อย handle
+    history.replaceState({}, '', REDIRECT_URI);
+    handleLineCallback(code, state);
+  }
+})();
 
 // ── GAS fetch wrapper (แทน google.script.run) ────────────────
 // ใช้ text/plain เพื่อหลีกเลี่ยง CORS preflight (OPTIONS) ที่ GAS ไม่รองรับ
